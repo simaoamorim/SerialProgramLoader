@@ -27,3 +27,5 @@
 
 pyuic5 main.ui -o main.py
 pyuic5 loader.ui -o loader.py
+pyuic5 confirm_send.ui -o confirm_send.py
+pyuic5 send_status.ui -o send_status.py

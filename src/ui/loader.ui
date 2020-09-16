@@ -10,6 +10,11 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -23,15 +28,11 @@
    </item>
    <item row="1" column="2">
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>7</number>
+     </property>
      <item>
-      <widget class="QPushButton" name="sendButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Send</string>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="serialPortChooser"/>
      </item>
      <item>
       <spacer name="verticalSpacer">
@@ -46,10 +47,31 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QPushButton" name="sendButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Send</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QListView" name="programListView"/>
+    <widget class="QListWidget" name="programListWidget">
+     <property name="selectionRectVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="updateProgramListButton">
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

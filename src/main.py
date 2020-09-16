@@ -22,10 +22,54 @@
 
 import sys
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtSerialPort
 
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
+from ui.confirm_send import Ui_confirmSend
+from ui.send_status import Ui_sendStatus
+
+
+class SendStatus(QtWidgets.QDialog):
+    def __init__(self, filepath, port_info, parent=None):
+        super(SendStatus, self).__init__(parent)
+        self.ui = Ui_sendStatus()
+        self.ui.setupUi(self)
+        self.filepath = filepath
+        self.port = QtSerialPort.QSerialPort(port_info)
+
+    def exec(self):
+        self.show()
+        self.update()
+        self.repaint()
+        self.port.open(
+            QtSerialPort.QSerialPort.ReadWrite or
+            QtSerialPort.QSerialPort.SoftwareControl or
+            QtSerialPort.QSerialPort.EvenParity or
+            QtSerialPort.QSerialPort.TwoStop or
+            QtSerialPort.QSerialPort.Data7
+        )
+        with open(self.filepath, 'r') as file:
+            file.seek(0, 2)
+            _size = file.tell()
+            file.seek(0, 0)
+            _size_sum = 0
+            for line in file.readlines():
+                self.port.write(line.encode('UTF-8'))
+                _size_sum += len(line) + 1
+                self.ui.progressBar.setValue(int(_size_sum * 100 / _size))
+                self.repaint()
+                self.update()
+            self.ui.buttonBox.setEnabled(True)
+        self.port.close()
+        super(SendStatus, self).exec_()
+
+
+class ConfirmSend(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(ConfirmSend, self).__init__(parent)
+        self.ui = Ui_confirmSend()
+        self.ui.setupUi(self)
 
 
 class Loader(QtWidgets.QWidget):
@@ -33,15 +77,50 @@ class Loader(QtWidgets.QWidget):
         super(Loader, self).__init__()
         self.ui = Ui_Loader()
         self.ui.setupUi(self)
-        self.path = QtCore.QDir.currentPath()
-        self.filter = QtCore.QDir
-        self.fsmodel = QtWidgets.QFileSystemModel()
-        self.fsmodel.setFilter(QtCore.QDir.Files)
-        self.ui.programListView.setModel(self.fsmodel)
-        self.fsmodel.setRootPath(self.path)
-        self.ui.programListView.setRootIndex(
-            self.fsmodel.index(self.path)
+        self.dir = QtCore.QDir(QtCore.QDir.currentPath()+'/programs/')
+        print(self.dir.path())
+        self.dir.setFilter(QtCore.QDir.Files or QtCore.QDir.NoDotAndDotDot)
+        self.fsmodel = QtWidgets.QFileSystemModel(self.ui.programListWidget)
+        self.fsmodel.setRootPath(self.dir.path())
+        self.ui.updateProgramListButton.clicked.connect(self.update_program_list)
+        self.ui.programListWidget.itemSelectionChanged.connect(self.selection_changed)
+        self.ui.sendButton.clicked.connect(self.send_program)
+        self.update_program_list()
+        ports = QtSerialPort.QSerialPortInfo.availablePorts()
+        for port in ports:
+            self.ui.serialPortChooser.addItem(port.portName())
+        self.ui.serialPortChooser.setCurrentIndex(-1)
+        self.ui.serialPortChooser.currentTextChanged.connect(self.selection_changed)
+
+    def update_program_list(self):
+        self.ui.programListWidget.clear()
+        self.dir.refresh()
+        self.ui.programListWidget.addItems(
+            self.dir.entryList()
         )
+        self.ui.programListWidget.clearSelection()
+        self.ui.sendButton.setDisabled(True)
+
+    def selection_changed(self):
+        if self.ui.serialPortChooser.currentText() != '' and self.ui.programListWidget.currentItem() is not None:
+            self.ui.sendButton.setEnabled(True)
+
+    def send_program(self):
+        selections = self.ui.programListWidget.selectedItems()
+        for selection in selections:
+            filename = selection.text()
+            filepath = self.dir.path() + '/' + selection.text()
+            port = self.ui.serialPortChooser.currentText()
+            port_info = QtSerialPort.QSerialPortInfo(port)
+            confirm = ConfirmSend(self)
+            confirm.ui.dialogLabel.setText(f'Send program \'{filename}\'?')
+            confirm.exec()
+            if confirm.result() == confirm.Accepted:
+                # Send program
+                send_status = SendStatus(filepath, port_info)
+                send_status.exec()
+            else:
+                print('Nothing done')
 
 
 class SerialProgramLoader(QtWidgets.QMainWindow):
