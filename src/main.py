@@ -21,9 +21,8 @@
 # SOFTWARE.
 
 import sys
-from os import getcwd
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
@@ -34,10 +33,15 @@ class Loader(QtWidgets.QWidget):
         super(Loader, self).__init__()
         self.ui = Ui_Loader()
         self.ui.setupUi(self)
+        self.path = QtCore.QDir.currentPath()
+        self.filter = QtCore.QDir
         self.fsmodel = QtWidgets.QFileSystemModel()
+        self.fsmodel.setFilter(QtCore.QDir.Files)
         self.ui.programListView.setModel(self.fsmodel)
-        self.ui.programListView.setRootIndex(self.fsmodel.index(getcwd()))
-        self.fsmodel.setRootPath(getcwd())
+        self.fsmodel.setRootPath(self.path)
+        self.ui.programListView.setRootIndex(
+            self.fsmodel.index(self.path)
+        )
 
 
 class SerialProgramLoader(QtWidgets.QMainWindow):
