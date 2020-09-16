@@ -21,10 +21,23 @@
 # SOFTWARE.
 
 import sys
+from os import getcwd
 
 from PyQt5 import QtWidgets
 
-from ui.form import Ui_MainWindow
+from ui.loader import Ui_Loader
+from ui.main import Ui_MainWindow
+
+
+class Loader(QtWidgets.QWidget):
+    def __init__(self):
+        super(Loader, self).__init__()
+        self.ui = Ui_Loader()
+        self.ui.setupUi(self)
+        self.fsmodel = QtWidgets.QFileSystemModel()
+        self.ui.programListView.setModel(self.fsmodel)
+        self.ui.programListView.setRootIndex(self.fsmodel.index(getcwd()))
+        self.fsmodel.setRootPath(getcwd())
 
 
 class SerialProgramLoader(QtWidgets.QMainWindow):
@@ -32,10 +45,13 @@ class SerialProgramLoader(QtWidgets.QMainWindow):
         super(SerialProgramLoader, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.loaderTabLayout.addWidget(Loader())
 
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = SerialProgramLoader()
-    window.showFullScreen()
-    sys.exit(app.exec_())
+    window.show()
+    # window.showFullScreen()
+    ret = app.exec()
+    sys.exit(ret)

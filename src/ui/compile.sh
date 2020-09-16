@@ -25,4 +25,5 @@
 #
 #
 
-pyuic5 form.ui --output=form.py
+pyuic5 main.ui -o main.py
+pyuic5 loader.ui -o loader.py
