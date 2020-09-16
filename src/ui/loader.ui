@@ -24,9 +24,12 @@
    <item row="1" column="2">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="sendButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
-        <string>PushButton</string>
+        <string>Send</string>
        </property>
       </widget>
      </item>
