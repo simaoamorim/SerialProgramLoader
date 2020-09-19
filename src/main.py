@@ -134,15 +134,10 @@ class Loader(QtWidgets.QWidget):
                         _size_sum += len(line) + 1
                         if self.send_status is not None:
                             self.send_status.update_status(int(min(_size_sum * 100 // _size, 100)))
-                        # while not port.isDataTerminalReady():
-                            # print('no')
-                        # port.waitForReadyRead()
-                        # data = port.readAll()
                 port.write(QtCore.QByteArray('%'.encode('utf-8')))
                 port.waitForBytesWritten()
                 port.close()
                 self.send_status.exec_()
-                # thread.join()
                 print('ok')
             else:
                 print('Nothing done')
