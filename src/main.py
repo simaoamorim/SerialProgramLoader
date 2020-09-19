@@ -70,8 +70,7 @@ class Loader(QtWidgets.QWidget):
         self.ui.programListWidget.itemSelectionChanged.connect(self.selection_changed)
         self.ui.sendButton.clicked.connect(self.send_program)
         self.update_program_list()
-        ports = QtSerialPort.QSerialPortInfo.availablePorts()
-        for port in ports:
+        for port in QtSerialPort.QSerialPortInfo.availablePorts():
             self.ui.serialPortChooser.addItem(port.portName())
         self.ui.serialPortChooser.setCurrentIndex(0)
         self.ui.serialPortChooser.currentTextChanged.connect(self.selection_changed)
@@ -94,9 +93,8 @@ class Loader(QtWidgets.QWidget):
         selections = self.ui.programListWidget.selectedItems()
         for selection in selections:
             filename = selection.text()
-            filepath = self.dir.path() + '/' + selection.text()
+            filepath = self.dir.path() + '/' + filename
             port_chosen = self.ui.serialPortChooser.currentText()
-            port_info = QtSerialPort.QSerialPortInfo(port_chosen)
             confirm = ConfirmSend(self)
             confirm.ui.dialogLabel.setText(f'Send program \'{filename}\'?')
             confirm.exec()
@@ -104,11 +102,8 @@ class Loader(QtWidgets.QWidget):
                 # Send program
                 self.send_status = SendStatus(self)
                 self.send_status.show()
-                port = QtSerialPort.QSerialPort(port_info, self)
-                print('Setting port baud...', end='')
+                port = QtSerialPort.QSerialPort(port_chosen, self)
                 port.setBaudRate(port.Baud19200)
-                print('done')
-                print('Opening port...', end='')
                 port.setDataBits(port.Data7)
                 port.setParity(port.EvenParity)
                 port.setStopBits(port.TwoStop)
@@ -118,29 +113,23 @@ class Loader(QtWidgets.QWidget):
                     print('Error %s' % port.error())
                     print(port.errorString())
                     return
-                print('done')
-                port.write(QtCore.QByteArray('%'.encode('utf-8')))
-                port.waitForBytesWritten()
                 with open(filepath, 'r') as file:
                     file.seek(0, 2)
                     _size = file.tell()
                     file.seek(0, 0)
                     _size_sum = 0
+                    port.write(QtCore.QByteArray('%'.encode('utf-8')))
                     for line in file.readlines():
                         port.write(QtCore.QByteArray(line.encode('UTF-8')))
-                        port.waitForBytesWritten()
-                        # port.flush()
                         print(line, end='')
                         _size_sum += len(line) + 1
                         if self.send_status is not None:
-                            self.send_status.update_status(int(min(_size_sum * 100 // _size, 100)))
+                            self.send_status.update_status(
+                                _size_sum * 100 // _size
+                            )
                 port.write(QtCore.QByteArray('%'.encode('utf-8')))
-                port.waitForBytesWritten()
                 port.close()
                 self.send_status.exec_()
-                print('ok')
-            else:
-                print('Nothing done')
 
 
 class SerialProgramLoader(QtWidgets.QMainWindow):
