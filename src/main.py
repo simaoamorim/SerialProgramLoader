@@ -65,30 +65,37 @@ class ConfirmSend(QtWidgets.QDialog):
         self.ui.setupUi(self)
 
 
-def send(filepath: str, port: QtSerialPort.QSerialPort, status_cb: callable):
-    port.setBaudRate(port.Baud115200)
-    port.open(
-        QtSerialPort.QSerialPort.ReadWrite or
-        QtSerialPort.QSerialPort.SoftwareControl or
-        QtSerialPort.QSerialPort.EvenParity or
-        QtSerialPort.QSerialPort.TwoStop or
-        QtSerialPort.QSerialPort.Data7
-    )
-    if not port.isOpen():
-        raise QtSerialPort.QSerialPort.OpenError
-    with open(filepath, 'r') as file:
-        file.seek(0, 2)
-        _size = file.tell()
-        file.seek(0, 0)
-        _size_sum = 0
-        for line in file.readlines():
-            port.write(QtCore.QByteArray(line.encode('UTF-8')))
-            print(line, end='')
-            _size_sum += len(line) + 1
-            status_cb(int(min(_size_sum * 100 // _size, 100)))
-            # time.sleep(0.001)
-        # self.ui.buttonBox.setEnabled(True)
-    port.close()
+class Sender(QtCore.QThread):
+    def __init__(self, parent, filepath: str, port_info: QtSerialPort.QSerialPortInfo, status_cb: callable):
+        super(Sender, self).__init__(parent)
+        self.filepath = filepath
+        self.port = QtSerialPort.QSerialPort(port_info)
+        self.status_cb = status_cb
+
+    def run(self):
+        self.port.setBaudRate(self.port.Baud115200)
+        self.port.open(
+            QtSerialPort.QSerialPort.ReadWrite or
+            QtSerialPort.QSerialPort.SoftwareControl or
+            QtSerialPort.QSerialPort.EvenParity or
+            QtSerialPort.QSerialPort.TwoStop or
+            QtSerialPort.QSerialPort.Data7
+        )
+        if not self.port.isOpen():
+            raise QtSerialPort.QSerialPort.OpenError
+        with open(self.filepath, 'r') as file:
+            file.seek(0, 2)
+            _size = file.tell()
+            file.seek(0, 0)
+            _size_sum = 0
+            for line in file.readlines():
+                self.port.write(QtCore.QByteArray(line.encode('UTF-8')))
+                print(line, end='')
+                _size_sum += len(line) + 1
+                self.status_cb(int(min(_size_sum * 100 // _size, 100)))
+                # time.sleep(0.001)
+            # self.ui.buttonBox.setEnabled(True)
+        self.port.close()
 
 
 class Loader(QtWidgets.QWidget):
@@ -146,9 +153,7 @@ class Loader(QtWidgets.QWidget):
                 # Send program
                 self.send_status = SendStatus(filepath, port_info, self)
                 self.send_status.show()
-                port = QtSerialPort.QSerialPort(port_info)
-                thread = threading.Thread(target=send, args=[filepath, port, self.send_status.update_status])
-                thread.setDaemon(True)
+                thread = Sender(self, filepath, port_info, self.send_status.update_status)
                 thread.start()
                 self.send_status.exec_()
                 # thread.join()
