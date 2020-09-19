@@ -40,7 +40,7 @@ class SendStatus(QtWidgets.QDialog):
         self.ui = Ui_sendStatus()
         self.ui.setupUi(self)
         if self.statusProvider is not None:
-            self.startTimer(200)
+            self.timer_id = self.startTimer(200)
         else:
             self.ui.progressBar.setVisible(False)
 
@@ -48,7 +48,8 @@ class SendStatus(QtWidgets.QDialog):
         self.ui.progressBar.setValue(status)
         if status == 100:
             self.ui.buttonBox.setEnabled(True)
-        self.update()
+            self.killTimer(self.timer_id)
+        # self.update()
 
     def timerEvent(self, event: QtCore.QTimerEvent):
         event.accept()
@@ -160,7 +161,7 @@ class Loader(QtWidgets.QWidget):
             confirm.exec()
             if confirm.result() == confirm.Accepted:
                 # Send program
-                self.sender = Sender(port_chosen, filepath, self)
+                self.sender = Sender(port_chosen, filepath)
                 self.send_status = SendStatus(self, self.sender.getStatus)
                 self.send_status.show()
                 self.sender.start()
