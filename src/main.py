@@ -157,7 +157,7 @@ class Loader(QtWidgets.QWidget):
                 # Send program
                 self.send_status = SendStatus(self)
                 self.send_status.show()
-                self.sender = Sender(port_chosen, filepath, self)
+                self.sender = Sender(port_chosen, filepath, self, self.send_status.update_status)
                 self.sender.start()
                 self.send_status.exec_()
 
