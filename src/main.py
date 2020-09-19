@@ -52,14 +52,17 @@ class ConfirmSend(QtWidgets.QDialog):
 
 class Sender(QtCore.QThread):
     def __init__(self,
-                 portname : str,
-                 filepath : str,
+                 portname: str,
+                 filepath: str,
                  parent: QtCore.QObject = None,
+                 status_cb: callable = None
                  ):
         super(Sender, self).__init__(parent)
+        self.status_cb = status_cb
         self.filepath = filepath
-        self._size = int
+        self._size = int(0)
         self._size_sum = int(0)
+        self.timer_id = int(0)
         try:
             self.port = QtSerialPort.QSerialPort(portname, self)
             self.port.setBaudRate(self.port.Baud19200)
@@ -71,6 +74,8 @@ class Sender(QtCore.QThread):
             raise ValueError(e)
         
     def run(self):
+        if self.status_cb is not None:
+            self.timer_id = self.startTimer(200)
         self.port.open(self.port.ReadWrite)
         if not self.port.isOpen():
             print('Error %s' % self.port.error())
@@ -90,6 +95,12 @@ class Sender(QtCore.QThread):
         self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
         self.port.waitForBytesWritten()
         self.port.close()
+        if self.status_cb is not None:
+            self.killTimer(self.timer_id)
+
+    def timerEvent(self, event: QtCore.QTimerEvent):
+        event.accept()
+        self.status_cb(self._size_sum * 100 // self._size)
 
 
 class Loader(QtWidgets.QWidget):
