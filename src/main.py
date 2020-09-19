@@ -53,6 +53,8 @@ class SendStatus(QtWidgets.QDialog):
 
     def update_status(self, status):
         self.ui.progressBar.setValue(status)
+        if status == 100:
+            self.ui.buttonBox.setEnabled(True)
         self.update()
 
 
@@ -80,7 +82,7 @@ def send(filepath: str, port: QtSerialPort.QSerialPort, status_cb: callable):
         file.seek(0, 0)
         _size_sum = 0
         for line in file.readlines():
-            # self.port.write(line.encode('UTF-8'))
+            port.write(line.encode('UTF-8'))
             print(line, end='')
             _size_sum += len(line) + 1
             status_cb(int(min(_size_sum * 100 // _size, 100)))
