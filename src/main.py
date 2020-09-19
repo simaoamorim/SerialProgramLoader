@@ -119,8 +119,10 @@ class Loader(QtWidgets.QWidget):
                     file.seek(0, 0)
                     _size_sum = 0
                     port.write(QtCore.QByteArray('%'.encode('utf-8')))
+                    port.waitForBytesWritten()
                     for line in file.readlines():
                         port.write(QtCore.QByteArray(line.encode('UTF-8')))
+                        port.waitForBytesWritten()
                         print(line, end='')
                         _size_sum += len(line) + 1
                         if self.send_status is not None:
@@ -128,6 +130,7 @@ class Loader(QtWidgets.QWidget):
                                 _size_sum * 100 // _size
                             )
                 port.write(QtCore.QByteArray('%'.encode('utf-8')))
+                port.waitForBytesWritten()
                 port.close()
                 self.send_status.exec_()
 
