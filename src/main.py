@@ -21,8 +21,9 @@
 # SOFTWARE.
 
 import sys
+import threading
 
-from PyQt5 import QtWidgets, QtCore, QtSerialPort
+from PySide2 import QtWidgets, QtCore, QtSerialPort, QtGui
 
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
@@ -38,31 +39,21 @@ class SendStatus(QtWidgets.QDialog):
         self.filepath = filepath
         self.port = QtSerialPort.QSerialPort(port_info)
 
-    def exec(self):
-        self.show()
+    def timerEvent(self, a0: QtCore.QTimerEvent) -> None:
+        a0.accept()
+        self.killTimer(a0.timerId())
+        thread = threading.Thread(target=self.update_status, args=[self.update_status])
+        thread.setDaemon(True)
+        thread.start()
+        # thread.join()
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        a0.accept()
+        # self.startTimer(0)
+
+    def update_status(self, status):
+        self.ui.progressBar.setValue(status)
         self.update()
-        self.repaint()
-        self.port.open(
-            QtSerialPort.QSerialPort.ReadWrite or
-            QtSerialPort.QSerialPort.SoftwareControl or
-            QtSerialPort.QSerialPort.EvenParity or
-            QtSerialPort.QSerialPort.TwoStop or
-            QtSerialPort.QSerialPort.Data7
-        )
-        with open(self.filepath, 'r') as file:
-            file.seek(0, 2)
-            _size = file.tell()
-            file.seek(0, 0)
-            _size_sum = 0
-            for line in file.readlines():
-                self.port.write(line.encode('UTF-8'))
-                _size_sum += len(line) + 1
-                self.ui.progressBar.setValue(int(_size_sum * 100 / _size))
-                self.repaint()
-                self.update()
-            self.ui.buttonBox.setEnabled(True)
-        self.port.close()
-        super(SendStatus, self).exec_()
 
 
 class ConfirmSend(QtWidgets.QDialog):
@@ -70,6 +61,31 @@ class ConfirmSend(QtWidgets.QDialog):
         super(ConfirmSend, self).__init__(parent)
         self.ui = Ui_confirmSend()
         self.ui.setupUi(self)
+
+
+def send(filepath: str, port: QtSerialPort.QSerialPort, status_cb: callable):
+    port.open(
+        QtSerialPort.QSerialPort.ReadWrite or
+        QtSerialPort.QSerialPort.SoftwareControl or
+        QtSerialPort.QSerialPort.EvenParity or
+        QtSerialPort.QSerialPort.TwoStop or
+        QtSerialPort.QSerialPort.Data7
+    )
+    if not port.isOpen():
+        raise QtSerialPort.QSerialPort.OpenError
+    with open(filepath, 'r') as file:
+        file.seek(0, 2)
+        _size = file.tell()
+        file.seek(0, 0)
+        _size_sum = 0
+        for line in file.readlines():
+            # self.port.write(line.encode('UTF-8'))
+            print(line, end='')
+            _size_sum += len(line) + 1
+            status_cb(int(min(_size_sum * 100 // _size, 100)))
+            # time.sleep(0.001)
+        # self.ui.buttonBox.setEnabled(True)
+    # port.close()
 
 
 class Loader(QtWidgets.QWidget):
@@ -80,8 +96,14 @@ class Loader(QtWidgets.QWidget):
         self.dir = QtCore.QDir(QtCore.QDir.currentPath()+'/programs/')
         print(self.dir.path())
         self.dir.setFilter(QtCore.QDir.Files or QtCore.QDir.NoDotAndDotDot)
-        self.fsmodel = QtWidgets.QFileSystemModel(self.ui.programListWidget)
-        self.fsmodel.setRootPath(self.dir.path())
+        self.fs_watcher = QtCore.QFileSystemWatcher(self.dir.path())
+        self.fs_watcher.addPath(self.dir.path())
+        # self.connect(
+        #     self.fs_watcher,
+        #     QtCore.SIGNAL('directoryChanged()'),
+        #     self,
+        #     QtCore.SLOT('update_program_list()')
+        # )
         self.ui.updateProgramListButton.clicked.connect(self.update_program_list)
         self.ui.programListWidget.itemSelectionChanged.connect(self.selection_changed)
         self.ui.sendButton.clicked.connect(self.send_program)
@@ -89,8 +111,10 @@ class Loader(QtWidgets.QWidget):
         ports = QtSerialPort.QSerialPortInfo.availablePorts()
         for port in ports:
             self.ui.serialPortChooser.addItem(port.portName())
-        self.ui.serialPortChooser.setCurrentIndex(-1)
+        self.ui.serialPortChooser.setCurrentIndex(0)
         self.ui.serialPortChooser.currentTextChanged.connect(self.selection_changed)
+        self.port = QtSerialPort.QSerialPort
+        self.send_status = SendStatus
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
@@ -117,8 +141,15 @@ class Loader(QtWidgets.QWidget):
             confirm.exec()
             if confirm.result() == confirm.Accepted:
                 # Send program
-                send_status = SendStatus(filepath, port_info)
-                send_status.exec()
+                self.send_status = SendStatus(filepath, port_info, self)
+                self.send_status.show()
+                port = QtSerialPort.QSerialPort(port_info)
+                thread = threading.Thread(target=send, args=[filepath, port, self.send_status.update_status])
+                thread.setDaemon(True)
+                thread.start()
+                self.send_status.exec_()
+                # thread.join()
+                print('ok')
             else:
                 print('Nothing done')
 
@@ -136,5 +167,5 @@ if __name__ == '__main__':
     window = SerialProgramLoader()
     window.show()
     # window.showFullScreen()
-    ret = app.exec()
+    ret = app.exec_()
     sys.exit(ret)

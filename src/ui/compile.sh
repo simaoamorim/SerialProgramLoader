@@ -25,7 +25,7 @@
 #
 #
 
-pyuic5 main.ui -o main.py
-pyuic5 loader.ui -o loader.py
-pyuic5 confirm_send.ui -o confirm_send.py
-pyuic5 send_status.ui -o send_status.py
+pyside2-uic main.ui -o main.py
+pyside2-uic loader.ui -o loader.py
+pyside2-uic confirm_send.ui -o confirm_send.py
+pyside2-uic send_status.ui -o send_status.py
