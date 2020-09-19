@@ -43,6 +43,7 @@ class SendStatus(QtWidgets.QDialog):
         self.update()
         self.repaint()
         self.port.open(
+            QtSerialPort.QSerialPort.Baud115200 or
             QtSerialPort.QSerialPort.ReadWrite or
             QtSerialPort.QSerialPort.SoftwareControl or
             QtSerialPort.QSerialPort.EvenParity or
