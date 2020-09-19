@@ -31,16 +31,28 @@ from ui.send_status import Ui_sendStatus
 
 
 class SendStatus(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self,
+                 parent=None,
+                 statusProvider: callable = None
+                 ):
         super(SendStatus, self).__init__(parent)
+        self.statusProvider = statusProvider
         self.ui = Ui_sendStatus()
         self.ui.setupUi(self)
+        if self.statusProvider is not None:
+            self.startTimer(200)
+            self.ui.progressBar.setVisible(False)
 
     def update_status(self, status):
         self.ui.progressBar.setValue(status)
         if status == 100:
             self.ui.buttonBox.setEnabled(True)
         self.update()
+
+    def timerEvent(self, event: QtCore.QTimerEvent):
+        event.accept()
+        status = self.statusProvider()
+        self.update_status(status)
 
 
 class ConfirmSend(QtWidgets.QDialog):
@@ -54,15 +66,12 @@ class Sender(QtCore.QThread):
     def __init__(self,
                  portname: str,
                  filepath: str,
-                 parent: QtCore.QObject = None,
-                 status_cb: callable = None
+                 parent: QtCore.QObject = None
                  ):
         super(Sender, self).__init__(parent)
-        self.status_cb = status_cb
         self.filepath = filepath
         self._size = int(0)
         self._size_sum = int(0)
-        self.timer_id = int(0)
         try:
             self.port = QtSerialPort.QSerialPort(portname, self)
             self.port.setBaudRate(self.port.Baud19200)
@@ -74,8 +83,6 @@ class Sender(QtCore.QThread):
             raise ValueError(e)
         
     def run(self):
-        if self.status_cb is not None:
-            self.timer_id = self.startTimer(200)
         self.port.open(self.port.ReadWrite)
         if not self.port.isOpen():
             print('Error %s' % self.port.error())
@@ -95,12 +102,9 @@ class Sender(QtCore.QThread):
         self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
         self.port.waitForBytesWritten()
         self.port.close()
-        if self.status_cb is not None:
-            self.killTimer(self.timer_id)
 
-    def timerEvent(self, event: QtCore.QTimerEvent):
-        event.accept()
-        self.status_cb(self._size_sum * 100 // self._size)
+    def getStatus(self) -> int:
+        return self._size_sum * 100 // self._size
 
 
 class Loader(QtWidgets.QWidget):
@@ -155,9 +159,9 @@ class Loader(QtWidgets.QWidget):
             confirm.exec()
             if confirm.result() == confirm.Accepted:
                 # Send program
-                self.send_status = SendStatus(self)
+                self.sender = Sender(port_chosen, filepath, self)
+                self.send_status = SendStatus(self, self.sender.getStatus)
                 self.send_status.show()
-                self.sender = Sender(port_chosen, filepath, self, self.send_status.update_status)
                 self.sender.start()
                 self.send_status.exec_()
 
