@@ -111,9 +111,9 @@ class Loader(QtWidgets.QWidget):
                 print('done')
                 print('Opening port...', end='')
                 port.open(
-                    port.ReadWrite or
-                    port.EvenParity or
-                    port.TwoStop or
+                    port.ReadWrite and
+                    port.EvenParity and
+                    port.TwoStop and
                     port.Data7
                 )
                 if not port.isOpen():
