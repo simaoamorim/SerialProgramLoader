@@ -108,7 +108,6 @@ class Loader(QtWidgets.QWidget):
             self.ui.serialPortChooser.addItem(port.portName())
         self.ui.serialPortChooser.setCurrentIndex(0)
         self.ui.serialPortChooser.currentTextChanged.connect(self.selection_changed)
-        self.port = QtSerialPort.QSerialPort
         self.send_status = SendStatus
 
     def update_program_list(self):
