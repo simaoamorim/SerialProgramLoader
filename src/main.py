@@ -82,13 +82,13 @@ def send(filepath: str, port: QtSerialPort.QSerialPort, status_cb: callable):
         file.seek(0, 0)
         _size_sum = 0
         for line in file.readlines():
-            port.write(line.encode('UTF-8'))
+            port.write(QtCore.QByteArray(line.encode('UTF-8')))
             print(line, end='')
             _size_sum += len(line) + 1
             status_cb(int(min(_size_sum * 100 // _size, 100)))
             # time.sleep(0.001)
         # self.ui.buttonBox.setEnabled(True)
-    # port.close()
+    port.close()
 
 
 class Loader(QtWidgets.QWidget):
@@ -137,8 +137,8 @@ class Loader(QtWidgets.QWidget):
         for selection in selections:
             filename = selection.text()
             filepath = self.dir.path() + '/' + selection.text()
-            port = self.ui.serialPortChooser.currentText()
-            port_info = QtSerialPort.QSerialPortInfo(port)
+            port_chosen = self.ui.serialPortChooser.currentText()
+            port_info = QtSerialPort.QSerialPortInfo(port_chosen)
             confirm = ConfirmSend(self)
             confirm.ui.dialogLabel.setText(f'Send program \'{filename}\'?')
             confirm.exec()
