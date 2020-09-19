@@ -122,19 +122,22 @@ class Loader(QtWidgets.QWidget):
                     return
                 print('done')
                 port.write(QtCore.QByteArray('%'.encode('utf-8')))
+                port.waitForBytesWritten()
                 with open(filepath, 'r') as file:
                     file.seek(0, 2)
                     _size = file.tell()
                     file.seek(0, 0)
                     _size_sum = 0
                     for line in file.readlines():
-                        port.write(line.encode('UTF-8'))
-                        port.flush()
+                        port.write(QtCore.QByteArray(line.encode('UTF-8')))
+                        port.waitForBytesWritten()
+                        # port.flush()
                         print(line, end='')
                         _size_sum += len(line) + 1
                         if self.send_status is not None:
                             self.send_status.update_status(int(min(_size_sum * 100 // _size, 100)))
-                port.write('%'.encode('utf-8'))
+                port.write(QtCore.QByteArray('%'.encode('utf-8')))
+                port.waitForBytesWritten()
                 port.close()
                 self.send_status.exec_()
                 # thread.join()
