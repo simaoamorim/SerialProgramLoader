@@ -107,7 +107,7 @@ class Loader(QtWidgets.QWidget):
                 self.send_status.show()
                 port = QtSerialPort.QSerialPort(port_info, self)
                 print('Setting port baud...', end='')
-                port.setBaudRate(port.Baud115200)
+                port.setBaudRate(port.Baud19200)
                 print('done')
                 print('Opening port...', end='')
                 port.open(
@@ -128,6 +128,7 @@ class Loader(QtWidgets.QWidget):
                     _size_sum = 0
                     for line in file.readlines():
                         port.write(QtCore.QByteArray(line.encode('UTF-8')))
+                        port.write
                         print(line, end='')
                         _size_sum += len(line) + 1
                         if self.send_status is not None:
