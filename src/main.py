@@ -21,13 +21,12 @@
 # SOFTWARE.
 
 import sys
-import threading
 
-from PySide2 import QtWidgets, QtCore, QtSerialPort, QtGui
+from PySide2 import QtWidgets, QtCore, QtSerialPort
 
+from ui.confirm_send import Ui_confirmSend
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
-from ui.confirm_send import Ui_confirmSend
 from ui.send_status import Ui_sendStatus
 
 
@@ -154,8 +153,20 @@ class SerialProgramLoader(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
+    app.setApplicationName('Serial Program Loader')
+    app.setApplicationVersion('0.0.0')
+    parser = QtCore.QCommandLineParser()
+    parser.setApplicationDescription('Program to send Machining routines to '
+                                     'CNC machines via serial port')
+    startFullScreen = QtCore.QCommandLineOption(('f', 'fullscreen'), "Start in fullscreen mode")
+    parser.addOption(startFullScreen)
+    parser.addHelpOption()
+    parser.addVersionOption()
+    parser.process(app)
     window = SerialProgramLoader()
-    window.show()
-    # window.showFullScreen()
+    if parser.isSet(startFullScreen):
+        window.showFullScreen()
+    else:
+        window.show()
     ret = app.exec_()
     sys.exit(ret)
