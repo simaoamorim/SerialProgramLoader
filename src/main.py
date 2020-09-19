@@ -30,40 +30,6 @@ from ui.main import Ui_MainWindow
 from ui.send_status import Ui_sendStatus
 
 
-class SendStatus(QtWidgets.QDialog):
-    def __init__(self,
-                 parent=None,
-                 statusProvider=None
-                 ):
-        super(SendStatus, self).__init__(parent)
-        self.statusProvider = statusProvider
-        self.ui = Ui_sendStatus()
-        self.ui.setupUi(self)
-        if self.statusProvider is not None:
-            self.timer_id = self.startTimer(200)
-        else:
-            self.ui.progressBar.setVisible(False)
-
-    def update_status(self, status):
-        self.ui.progressBar.setValue(status)
-        if status == 100:
-            self.ui.buttonBox.setEnabled(True)
-            self.killTimer(self.timer_id)
-        # self.update()
-
-    def timerEvent(self, event: QtCore.QTimerEvent):
-        event.accept()
-        status = self.statusProvider()
-        self.update_status(status)
-
-
-class ConfirmSend(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(ConfirmSend, self).__init__(parent)
-        self.ui = Ui_confirmSend()
-        self.ui.setupUi(self)
-
-
 class Sender(QtCore.QThread):
     def __init__(self,
                  portname: str,
@@ -83,7 +49,7 @@ class Sender(QtCore.QThread):
             self.port.setFlowControl(self.port.SoftwareControl)
         except QtSerialPort.QSerialPort.DeviceNotFoundError as e:
             raise ValueError(e)
-        
+
     def run(self):
         self.port.open(self.port.ReadWrite)
         if not self.port.isOpen():
@@ -107,6 +73,39 @@ class Sender(QtCore.QThread):
 
     def getStatus(self) -> int:
         return self._size_sum * 100 // self._size
+
+
+class SendStatus(QtWidgets.QDialog):
+    def __init__(self,
+                 parent: QtCore.QObject = None,
+                 sender: Sender = None
+                 ):
+        super(SendStatus, self).__init__(parent)
+        self.sender = sender
+        self.ui = Ui_sendStatus()
+        self.ui.setupUi(self)
+        if self.sender is not None:
+            self.timer_id = self.startTimer(200)
+        else:
+            self.ui.progressBar.setVisible(False)
+
+    def update_status(self, status):
+        self.ui.progressBar.setValue(status)
+        if status == 100:
+            self.ui.buttonBox.setEnabled(True)
+            self.killTimer(self.timer_id)
+        # self.update()
+
+    def timerEvent(self, event: QtCore.QTimerEvent):
+        event.accept()
+        self.update_status(self.sender.getStatus())
+
+
+class ConfirmSend(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(ConfirmSend, self).__init__(parent)
+        self.ui = Ui_confirmSend()
+        self.ui.setupUi(self)
 
 
 class Loader(QtWidgets.QWidget):
@@ -162,7 +161,7 @@ class Loader(QtWidgets.QWidget):
             if confirm.result() == confirm.Accepted:
                 # Send program
                 self.sender = Sender(port_chosen, filepath)
-                self.send_status = SendStatus(self, self.sender.getStatus)
+                self.send_status = SendStatus(self, self.sender)
                 self.send_status.show()
                 self.sender.start()
                 self.send_status.exec_()
