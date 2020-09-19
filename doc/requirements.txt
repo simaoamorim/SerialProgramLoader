@@ -1,3 +1,2 @@
-pyserial~=3.4
 setuptools~=50.3.0
 PySide2~=5.15.1
