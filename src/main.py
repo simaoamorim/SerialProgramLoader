@@ -118,7 +118,8 @@ class Loader(QtWidgets.QWidget):
                     port.Data7
                 )
                 if not port.isOpen():
-                    print('Error')
+                    print('Error %' % port.error())
+                    print(port.errorString())
                     return
                 print('done')
                 port.write(QtCore.QByteArray('%'.encode('utf-8')))
