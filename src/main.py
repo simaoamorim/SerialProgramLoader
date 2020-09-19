@@ -85,7 +85,7 @@ class SendStatus(QtWidgets.QDialog):
         self.ui = Ui_sendStatus()
         self.ui.setupUi(self)
         if self.sender is not None:
-            self.timer_id = self.startTimer(200)
+            self.timer_id = self.startTimer(500)
         else:
             self.ui.progressBar.setVisible(False)
 
@@ -94,7 +94,7 @@ class SendStatus(QtWidgets.QDialog):
         if status == 100:
             self.ui.buttonBox.setEnabled(True)
             self.killTimer(self.timer_id)
-        # self.update()
+        self.repaint()
 
     def timerEvent(self, event: QtCore.QTimerEvent):
         event.accept()
