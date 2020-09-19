@@ -115,7 +115,7 @@ class Loader(QtWidgets.QWidget):
                 port.setFlowControl(port.SoftwareControl)
                 port.open(port.ReadWrite)
                 if not port.isOpen():
-                    print('Error %' % port.error())
+                    print('Error %s' % port.error())
                     print(port.errorString())
                     return
                 print('done')
