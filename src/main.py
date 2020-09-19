@@ -32,24 +32,10 @@ from ui.send_status import Ui_sendStatus
 
 
 class SendStatus(QtWidgets.QDialog):
-    def __init__(self, filepath, port_info, parent=None):
+    def __init__(self, parent=None):
         super(SendStatus, self).__init__(parent)
         self.ui = Ui_sendStatus()
         self.ui.setupUi(self)
-        self.filepath = filepath
-        self.port = QtSerialPort.QSerialPort(port_info)
-
-    def timerEvent(self, a0: QtCore.QTimerEvent) -> None:
-        a0.accept()
-        self.killTimer(a0.timerId())
-        thread = threading.Thread(target=self.update_status, args=[self.update_status])
-        thread.setDaemon(True)
-        thread.start()
-        # thread.join()
-
-    def showEvent(self, a0: QtGui.QShowEvent) -> None:
-        a0.accept()
-        # self.startTimer(0)
 
     def update_status(self, status):
         self.ui.progressBar.setValue(status)
@@ -69,7 +55,7 @@ class Sender(QtCore.QThread):
     def __init__(self, parent, filepath: str, port_info: QtSerialPort.QSerialPortInfo, status_cb: callable):
         super(Sender, self).__init__(parent)
         self.filepath = filepath
-        self.port = QtSerialPort.QSerialPort(port_info)
+        self.port = QtSerialPort.QSerialPort(port_info, self)
         self.status_cb = status_cb
 
     def run(self):
@@ -92,9 +78,8 @@ class Sender(QtCore.QThread):
                 self.port.write(QtCore.QByteArray(line.encode('UTF-8')))
                 print(line, end='')
                 _size_sum += len(line) + 1
-                self.status_cb(int(min(_size_sum * 100 // _size, 100)))
-                # time.sleep(0.001)
-            # self.ui.buttonBox.setEnabled(True)
+                if self.status_cb is not None:
+                    self.status_cb(int(min(_size_sum * 100 // _size, 100)))
         self.port.close()
 
 
@@ -151,7 +136,7 @@ class Loader(QtWidgets.QWidget):
             confirm.exec()
             if confirm.result() == confirm.Accepted:
                 # Send program
-                self.send_status = SendStatus(filepath, port_info, self)
+                self.send_status = SendStatus(self)
                 self.send_status.show()
                 thread = Sender(self, filepath, port_info, self.send_status.update_status)
                 thread.start()
