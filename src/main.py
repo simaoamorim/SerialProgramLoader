@@ -110,13 +110,10 @@ class Loader(QtWidgets.QWidget):
                 port.setBaudRate(port.Baud19200)
                 print('done')
                 print('Opening port...', end='')
-                port.open(
-                    port.ReadWrite |
-                    port.NoFlowControl |
-                    port.EvenParity |
-                    port.TwoStop |
-                    port.Data7
-                )
+                port.setDataBits(port.Data7)
+                port.setParity(port.EvenParity)
+                port.setStopBits(port.TwoStop)
+                port.open(port.ReadWrite)
                 if not port.isOpen():
                     print('Error %' % port.error())
                     print(port.errorString())
