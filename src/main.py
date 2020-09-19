@@ -112,7 +112,7 @@ class Loader(QtWidgets.QWidget):
                 print('Opening port...', end='')
                 port.open(
                     port.ReadWrite or
-                    port.NoFlowControl or
+                    port.HardwareControl or
                     port.EvenParity or
                     port.TwoStop or
                     port.Data7
