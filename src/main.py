@@ -66,8 +66,8 @@ class ConfirmSend(QtWidgets.QDialog):
 
 
 def send(filepath: str, port: QtSerialPort.QSerialPort, status_cb: callable):
+    port.setBaudRate(port.Baud115200)
     port.open(
-        QtSerialPort.QSerialPort.Baud115200 or
         QtSerialPort.QSerialPort.ReadWrite or
         QtSerialPort.QSerialPort.SoftwareControl or
         QtSerialPort.QSerialPort.EvenParity or
