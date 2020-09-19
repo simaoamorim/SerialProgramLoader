@@ -33,7 +33,7 @@ from ui.send_status import Ui_sendStatus
 class SendStatus(QtWidgets.QDialog):
     def __init__(self,
                  parent=None,
-                 statusProvider: callable = None
+                 statusProvider=None
                  ):
         super(SendStatus, self).__init__(parent)
         self.statusProvider = statusProvider
@@ -41,6 +41,7 @@ class SendStatus(QtWidgets.QDialog):
         self.ui.setupUi(self)
         if self.statusProvider is not None:
             self.startTimer(200)
+        else:
             self.ui.progressBar.setVisible(False)
 
     def update_status(self, status):
