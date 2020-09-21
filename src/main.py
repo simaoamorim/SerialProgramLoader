@@ -40,6 +40,7 @@ class Sender(QtCore.QThread):
         self.filepath = filepath
         self._size = int(0)
         self._size_sum = int(0)
+        self.mutex = QtCore.QBasicMutex()
         try:
             self.port = QtSerialPort.QSerialPort(portname, self)
             self.port.setBaudRate(self.port.Baud19200)
@@ -58,7 +59,9 @@ class Sender(QtCore.QThread):
             return
         with open(self.filepath, 'r') as file:
             file.seek(0, 2)
+            self.mutex.lock()
             self._size = file.tell()
+            self.mutex.unlock()
             file.seek(0, 0)
             self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
             self.port.waitForBytesWritten()
@@ -66,13 +69,18 @@ class Sender(QtCore.QThread):
                 self.port.write(QtCore.QByteArray(line.encode('UTF-8')))
                 self.port.waitForBytesWritten()
                 print(line, end='')
+                self.mutex.lock()
                 self._size_sum += len(line) + 1
+                self.mutex.unlock()
         self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
         self.port.waitForBytesWritten()
         self.port.close()
 
-    def getStatus(self) -> int:
-        return self._size_sum * 100 // self._size
+    def get_status(self) -> int:
+        self.mutex.lock()
+        tmp = self._size_sum * 100 // self._size
+        self.mutex.unlock()
+        return tmp
 
 
 class SendStatus(QtWidgets.QDialog):
@@ -98,7 +106,7 @@ class SendStatus(QtWidgets.QDialog):
 
     def timerEvent(self, event: QtCore.QTimerEvent):
         event.accept()
-        self.update_status(self.sender.getStatus())
+        self.update_status(self.sender.get_status())
 
 
 class ConfirmSend(QtWidgets.QDialog):
