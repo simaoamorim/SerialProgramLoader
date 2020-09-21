@@ -38,7 +38,10 @@ class Sender(QtCore.QThread):
                  ):
         super(Sender, self).__init__(parent)
         self.filepath = filepath
-        self._size = int(0)
+        with open(self.filepath, 'r') as file:
+            file.seek(0, 2)
+            self._size = file.tell()
+            file.seek(0, 0)
         self._size_sum = int(0)
         self.mutex = QtCore.QBasicMutex()
         try:
@@ -58,11 +61,6 @@ class Sender(QtCore.QThread):
             print(self.port.errorString())
             return
         with open(self.filepath, 'r') as file:
-            file.seek(0, 2)
-            self.mutex.lock()
-            self._size = file.tell()
-            self.mutex.unlock()
-            file.seek(0, 0)
             self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
             self.port.waitForBytesWritten()
             for line in file.readlines():
@@ -72,13 +70,16 @@ class Sender(QtCore.QThread):
                 self.mutex.lock()
                 self._size_sum += len(line) + 1
                 self.mutex.unlock()
-        self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
-        self.port.waitForBytesWritten()
+            self.port.write(QtCore.QByteArray('%'.encode('utf-8')))
+            self.port.waitForBytesWritten()
         self.port.close()
 
     def get_status(self) -> int:
         self.mutex.lock()
-        tmp = self._size_sum * 100 // self._size
+        try:
+            tmp = self._size_sum * 100 // self._size
+        except ZeroDivisionError:
+            tmp = 0
         self.mutex.unlock()
         return tmp
 
@@ -102,11 +103,19 @@ class SendStatus(QtWidgets.QDialog):
         if status == 100:
             self.ui.buttonBox.setEnabled(True)
             self.killTimer(self.timer_id)
-        self.repaint()
+        self.update()
 
     def timerEvent(self, event: QtCore.QTimerEvent):
         event.accept()
         self.update_status(self.sender.get_status())
+        if self.sender.isFinished() and self.ui.progressBar.value() != 100:
+            self.killTimer(self.timer_id)
+            QtWidgets.QMessageBox.critical(
+                self,
+                'Error',
+                self.sender.port.errorString()
+            )
+            self.close()
 
 
 class ConfirmSend(QtWidgets.QDialog):
@@ -184,6 +193,8 @@ class Loader(QtWidgets.QWidget):
                 self.send_status.show()
                 self.sender.start()
                 self.send_status.exec_()
+                print(self.send_status.result())
+                self.send_status.deleteLater()
 
 
 class SerialProgramLoader(QtWidgets.QMainWindow):
