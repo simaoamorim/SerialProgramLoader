@@ -118,23 +118,30 @@ class Loader(QtWidgets.QWidget):
         self.dir.setFilter(QtCore.QDir.Files or QtCore.QDir.NoDotAndDotDot)
         self.fs_watcher = QtCore.QFileSystemWatcher(self.dir.path())
         self.fs_watcher.addPath(self.dir.path())
-        # self.connect(
-        #     self.fs_watcher,
-        #     QtCore.SIGNAL('directoryChanged()'),
-        #     self,
-        #     QtCore.SLOT('update_program_list()')
-        # )
-        self.ui.updateProgramListButton.clicked.connect(self.update_program_list)
-        self.ui.programListWidget.itemSelectionChanged.connect(self.selection_changed)
-        self.ui.sendButton.clicked.connect(self.send_program)
+        self.connect(
+            self.fs_watcher,
+            QtCore.SIGNAL('directoryChanged(QString)'),
+            self,
+            QtCore.SLOT('update_program_list()')
+        )
         self.update_program_list()
+        self.update_serial_port_list()
+        self.ui.updateProgramListButton.clicked.connect(self.refresh)
+        self.ui.programListWidget.itemSelectionChanged.connect(
+            self.selection_changed
+        )
+        self.ui.sendButton.clicked.connect(self.send_program)
+        self.ui.serialPortChooser.currentTextChanged.connect(
+            self.selection_changed
+        )
+        self.send_status = SendStatus
+        self.sender = Sender
+
+    def update_serial_port_list(self):
+        self.ui.serialPortChooser.clear()
         for port in QtSerialPort.QSerialPortInfo.availablePorts():
             self.ui.serialPortChooser.addItem(port.portName())
         self.ui.serialPortChooser.setCurrentIndex(0)
-        self.ui.serialPortChooser.currentTextChanged.connect(self.selection_changed)
-        self.send_status = SendStatus
-        self.sender = Sender
-        self.sender = Sender
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
@@ -148,6 +155,10 @@ class Loader(QtWidgets.QWidget):
     def selection_changed(self):
         if self.ui.serialPortChooser.currentText() != '' and self.ui.programListWidget.currentItem() is not None:
             self.ui.sendButton.setEnabled(True)
+
+    def refresh(self):
+        self.update_program_list()
+        self.update_serial_port_list()
 
     def send_program(self):
         selections = self.ui.programListWidget.selectedItems()
