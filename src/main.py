@@ -34,10 +34,20 @@ class Sender(QtCore.QThread):
     def __init__(self,
                  portname: str,
                  filepath: str,
+                 baudrate: str,
+                 databits: str,
+                 parity: str,
+                 stopbits: str,
+                 flowcontrol: str,
                  parent: QtCore.QObject = None
                  ):
         super(Sender, self).__init__(parent)
         self.filepath = filepath
+        self.baudrate = QtSerialPort.QSerialPort.BaudRate.values.get(baudrate)
+        self.databits = QtSerialPort.QSerialPort.DataBits.values.get(databits)
+        self.parity = QtSerialPort.QSerialPort.Parity.values.get(parity)
+        self.stopbits = QtSerialPort.QSerialPort.StopBits.values.get(stopbits)
+        self.flowcontrol = QtSerialPort.QSerialPort.FlowControl.values.get(flowcontrol)
         with open(self.filepath, 'r') as file:
             file.seek(0, 2)
             self._size = file.tell()
@@ -46,11 +56,11 @@ class Sender(QtCore.QThread):
         self.mutex = QtCore.QBasicMutex()
         try:
             self.port = QtSerialPort.QSerialPort(portname, self)
-            self.port.setBaudRate(self.port.Baud19200)
-            self.port.setDataBits(self.port.Data7)
-            self.port.setParity(self.port.EvenParity)
-            self.port.setStopBits(self.port.TwoStop)
-            self.port.setFlowControl(self.port.SoftwareControl)
+            self.port.setBaudRate(self.baudrate)
+            self.port.setDataBits(self.databits)
+            self.port.setParity(self.parity)
+            self.port.setStopBits(self.stopbits)
+            self.port.setFlowControl(self.flowcontrol)
         except QtSerialPort.QSerialPort.DeviceNotFoundError as e:
             raise ValueError(e)
 
@@ -143,6 +153,7 @@ class Loader(QtWidgets.QWidget):
         )
         self.update_program_list()
         self.update_serial_port_list()
+        self.set_serial_port_options()
         self.ui.updateProgramListButton.clicked.connect(self.refresh)
         self.ui.programListWidget.itemSelectionChanged.connect(
             self.selection_changed
@@ -154,11 +165,33 @@ class Loader(QtWidgets.QWidget):
         self.send_status = SendStatus
         self.sender = Sender
 
+    def set_serial_port_options(self):
+        self.ui.baudrateChooser.addItems(
+            QtSerialPort.QSerialPort.BaudRate.values.keys()
+        )
+        # self.ui.baudrateChooser.setCurrentText('Baud19200')
+        self.ui.parityChooser.addItems(
+            QtSerialPort.QSerialPort.Parity.values.keys()
+        )
+        # self.ui.parityChooser.setCurrentText('EvenParity')
+        self.ui.dataBitsChooser.addItems(
+            QtSerialPort.QSerialPort.DataBits.values.keys()
+        )
+        # self.ui.dataBitsChooser.setCurrentText('Data7')
+        self.ui.stopBitsChooser.addItems(
+            QtSerialPort.QSerialPort.StopBits.values.keys()
+        )
+        # self.ui.stopBitsChooser.setCurrentText('TwoStop')
+        self.ui.flowControlChooser.addItems(
+            QtSerialPort.QSerialPort.FlowControl.values.keys()
+        )
+        # self.ui.flowControlChooser.setCurrentText('SoftwareControl')
+
     def update_serial_port_list(self):
         self.ui.serialPortChooser.clear()
         for port in QtSerialPort.QSerialPortInfo.availablePorts():
             self.ui.serialPortChooser.addItem(port.portName())
-        self.ui.serialPortChooser.setCurrentIndex(0)
+        # self.ui.serialPortChooser.setCurrentIndex(0)
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
@@ -188,7 +221,15 @@ class Loader(QtWidgets.QWidget):
             confirm.exec()
             if confirm.result() == confirm.Accepted:
                 # Send program
-                self.sender = Sender(port_chosen, filepath)
+                self.sender = Sender(
+                    port_chosen,
+                    filepath,
+                    self.ui.baudrateChooser.currentText(),
+                    self.ui.dataBitsChooser.currentText(),
+                    self.ui.parityChooser.currentText(),
+                    self.ui.stopBitsChooser.currentText(),
+                    self.ui.flowControlChooser.currentText()
+                )
                 self.send_status = SendStatus(self, self.sender)
                 self.send_status.show()
                 self.sender.start()
