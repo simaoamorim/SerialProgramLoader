@@ -141,16 +141,10 @@ class Loader(QtWidgets.QWidget):
         self.ui = Ui_Loader()
         self.ui.setupUi(self)
         self.dir = QtCore.QDir(QtCore.QDir.currentPath()+'/programs/')
-        print(self.dir.path())
         self.dir.setFilter(QtCore.QDir.Files or QtCore.QDir.NoDotAndDotDot)
         self.fs_watcher = QtCore.QFileSystemWatcher(self.dir.path())
         self.fs_watcher.addPath(self.dir.path())
-        self.connect(
-            self.fs_watcher,
-            QtCore.SIGNAL('directoryChanged(QString)'),
-            self,
-            QtCore.SLOT('update_program_list()')
-        )
+        self.fs_watcher.directoryChanged.connect(self.update_program_list)
         self.update_program_list()
         self.update_serial_port_list()
         self.set_serial_port_options()
@@ -234,7 +228,6 @@ class Loader(QtWidgets.QWidget):
                 self.send_status.show()
                 self.sender.start()
                 self.send_status.exec_()
-                print(self.send_status.result())
                 self.send_status.deleteLater()
 
 
