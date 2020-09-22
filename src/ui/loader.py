@@ -116,12 +116,6 @@ class Ui_Loader(object):
 
         self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.groupBox)
 
-        self.sendButton = QPushButton(self.frame)
-        self.sendButton.setObjectName(u"sendButton")
-        self.sendButton.setEnabled(False)
-
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.sendButton)
-
         self.updateProgramListButton = QPushButton(self.frame)
         self.updateProgramListButton.setObjectName(u"updateProgramListButton")
 
@@ -130,6 +124,12 @@ class Ui_Loader(object):
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.formLayout.setItem(4, QFormLayout.FieldRole, self.verticalSpacer)
+
+        self.sendButton = QPushButton(self.frame)
+        self.sendButton.setObjectName(u"sendButton")
+        self.sendButton.setEnabled(False)
+
+        self.formLayout.setWidget(5, QFormLayout.SpanningRole, self.sendButton)
 
 
         self.gridLayout_2.addWidget(self.frame, 0, 1, 1, 1)
@@ -160,7 +160,7 @@ class Ui_Loader(object):
         self.label_2.setText(QCoreApplication.translate("Loader", u"Data Bits:", None))
         self.label_3.setText(QCoreApplication.translate("Loader", u"Stop Bits:", None))
         self.label.setText(QCoreApplication.translate("Loader", u"Flow Control:", None))
-        self.sendButton.setText(QCoreApplication.translate("Loader", u"Send", None))
         self.updateProgramListButton.setText(QCoreApplication.translate("Loader", u"Refresh", None))
+        self.sendButton.setText(QCoreApplication.translate("Loader", u"Send", None))
     # retranslateUi
 
