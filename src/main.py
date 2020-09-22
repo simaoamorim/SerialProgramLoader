@@ -30,6 +30,30 @@ from ui.main import Ui_MainWindow
 from ui.send_status import Ui_sendStatus
 
 
+def save_port(port: str):
+    globalSettings.setValue('serialport/port', port)
+
+
+def save_baud(baud: str):
+    globalSettings.setValue('serialport/baudrate', baud)
+
+
+def save_parity(parity: str):
+    globalSettings.setValue('serialport/parity', parity)
+
+
+def save_databits(databits: str):
+    globalSettings.setValue('serialport/databits', databits)
+
+
+def save_stopbits(stopbits: str):
+    globalSettings.setValue('serialport/stopbits', stopbits)
+
+
+def save_flowcontrol(flowcontrol: str):
+    globalSettings.setValue('serialport/flowcontrol', flowcontrol)
+
+
 class Sender(QtCore.QThread):
     def __init__(self,
                  portname: str,
@@ -136,28 +160,34 @@ class ConfirmSend(QtWidgets.QDialog):
 
 
 class Loader(QtWidgets.QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(Loader, self).__init__(parent=parent)
         self.ui = Ui_Loader()
         self.ui.setupUi(self)
-        self.dir = QtCore.QDir(QtCore.QDir.currentPath()+'/programs/')
+        self.dir = QtCore.QDir(QtCore.QDir.currentPath() + '/programs/')
         self.dir.setFilter(QtCore.QDir.Files or QtCore.QDir.NoDotAndDotDot)
         self.fs_watcher = QtCore.QFileSystemWatcher(self.dir.path())
         self.fs_watcher.addPath(self.dir.path())
         self.fs_watcher.directoryChanged.connect(self.update_program_list)
+
         self.update_program_list()
         self.update_serial_port_list()
         self.set_serial_port_options()
-        self.ui.updateProgramListButton.clicked.connect(self.refresh)
-        self.ui.programListWidget.itemSelectionChanged.connect(
-            self.selection_changed
-        )
-        self.ui.sendButton.clicked.connect(self.send_program)
-        self.ui.serialPortChooser.currentTextChanged.connect(
-            self.selection_changed
-        )
         self.send_status = SendStatus
         self.sender = Sender
+
+        self.ui.updateProgramListButton.clicked.connect(self.refresh)
+        self.ui.programListWidget.itemSelectionChanged.connect(
+            self.selection_changed)
+        self.ui.sendButton.clicked.connect(self.send_program)
+        self.ui.serialPortChooser.currentTextChanged.connect(
+            self.selection_changed)
+        self.ui.serialPortChooser.currentTextChanged.connect(save_port)
+        self.ui.baudrateChooser.currentTextChanged.connect(save_baud)
+        self.ui.parityChooser.currentTextChanged.connect(save_parity)
+        self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
+        self.ui.stopBitsChooser.currentTextChanged.connect(save_stopbits)
+        self.ui.flowControlChooser.currentTextChanged.connect(save_flowcontrol)
 
     def set_serial_port_options(self):
         self.ui.baudrateChooser.addItems(
@@ -166,41 +196,61 @@ class Loader(QtWidgets.QWidget):
             in QtSerialPort.QSerialPort.BaudRate.values.keys()
             if bauds.startswith('Baud')
         )
-        # self.ui.baudrateChooser.setCurrentText('Baud19200')
         self.ui.parityChooser.addItems(
             parity
             for parity
             in QtSerialPort.QSerialPort.Parity.values.keys()
             if not parity.startswith('Unknown')
         )
-        # self.ui.parityChooser.setCurrentText('EvenParity')
         self.ui.dataBitsChooser.addItems(
             dataBits
             for dataBits
             in QtSerialPort.QSerialPort.DataBits.values.keys()
             if dataBits.startswith('Data')
         )
-        # self.ui.dataBitsChooser.setCurrentText('Data7')
         self.ui.stopBitsChooser.addItems(
             stopBits
             for stopBits
             in QtSerialPort.QSerialPort.StopBits.values.keys()
             if not stopBits.startswith('Unknown')
         )
-        # self.ui.stopBitsChooser.setCurrentText('TwoStop')
         self.ui.flowControlChooser.addItems(
             flowControl
             for flowControl
             in QtSerialPort.QSerialPort.FlowControl.values.keys()
             if not flowControl.startswith('Unknown')
         )
-        # self.ui.flowControlChooser.setCurrentText('SoftwareControl')
+        if globalSettings.contains('serialport/baudrate'):
+            self.ui.serialPortChooser.setCurrentText(
+                globalSettings.value('serialport/port')
+            )
+            self.ui.baudrateChooser.setCurrentText(
+                globalSettings.value('serialport/baudrate')
+            )
+            self.ui.parityChooser.setCurrentText(
+                globalSettings.value('serialport/parity')
+            )
+            self.ui.dataBitsChooser.setCurrentText(
+                globalSettings.value('serialport/databits')
+            )
+            self.ui.stopBitsChooser.setCurrentText(
+                globalSettings.value('serialport/stopbits')
+            )
+            self.ui.flowControlChooser.setCurrentText(
+                globalSettings.value('serialport/flowcontrol')
+            )
+        else:
+            save_port(self.ui.serialPortChooser.currentText())
+            save_baud(self.ui.baudrateChooser.currentText())
+            save_parity(self.ui.parityChooser.currentText())
+            save_databits(self.ui.dataBitsChooser.currentText())
+            save_stopbits(self.ui.stopBitsChooser.currentText())
+            save_flowcontrol(self.ui.flowControlChooser.currentText())
 
     def update_serial_port_list(self):
         self.ui.serialPortChooser.clear()
         for port in QtSerialPort.QSerialPortInfo.availablePorts():
             self.ui.serialPortChooser.addItem(port.portName())
-        # self.ui.serialPortChooser.setCurrentIndex(0)
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
@@ -209,11 +259,13 @@ class Loader(QtWidgets.QWidget):
             self.dir.entryList()
         )
         self.ui.programListWidget.clearSelection()
-        self.ui.sendButton.setDisabled(True)
 
     def selection_changed(self):
-        if self.ui.serialPortChooser.currentText() != '' and self.ui.programListWidget.currentItem() is not None:
+        if self.ui.serialPortChooser.currentText() is not None \
+                and self.ui.programListWidget.currentItem() is not None:
             self.ui.sendButton.setEnabled(True)
+        else:
+            self.ui.sendButton.setDisabled(True)
 
     def refresh(self):
         self.update_program_list()
@@ -228,8 +280,7 @@ class Loader(QtWidgets.QWidget):
             confirm = ConfirmSend(self)
             confirm.ui.dialogLabel.setText(f'Send program \'{filename}\'?')
             confirm.exec()
-            if confirm.result() == confirm.Accepted:
-                # Send program
+            if confirm.result() == QtWidgets.QDialog.Accepted:
                 self.sender = Sender(
                     port_chosen,
                     filepath,
@@ -254,7 +305,8 @@ class SerialProgramLoader(QtWidgets.QMainWindow):
         self.ui.loaderFrameLayout = QtWidgets.QVBoxLayout(self.ui.loaderFrame)
         self.ui.loaderFrameLayout.setMargin(0)
         self.ui.loaderFrame.setLayout(self.ui.loaderFrameLayout)
-        self.ui.loaderFrameLayout.addWidget(Loader(self))
+        self.ui.loader = Loader(self)
+        self.ui.loaderFrameLayout.addWidget(self.ui.loader)
 
 
 if __name__ == '__main__':
@@ -269,6 +321,7 @@ if __name__ == '__main__':
     parser.addHelpOption()
     parser.addVersionOption()
     parser.process(app)
+    globalSettings = QtCore.QSettings('settings.ini', QtCore.QSettings.IniFormat)
     window = SerialProgramLoader()
     if parser.isSet(startFullScreen):
         window.showFullScreen()
