@@ -161,23 +161,38 @@ class Loader(QtWidgets.QWidget):
 
     def set_serial_port_options(self):
         self.ui.baudrateChooser.addItems(
-            QtSerialPort.QSerialPort.BaudRate.values.keys()
+            bauds
+            for bauds
+            in QtSerialPort.QSerialPort.BaudRate.values.keys()
+            if bauds.startswith('Baud')
         )
         # self.ui.baudrateChooser.setCurrentText('Baud19200')
         self.ui.parityChooser.addItems(
-            QtSerialPort.QSerialPort.Parity.values.keys()
+            parity
+            for parity
+            in QtSerialPort.QSerialPort.Parity.values.keys()
+            if not parity.startswith('Unknown')
         )
         # self.ui.parityChooser.setCurrentText('EvenParity')
         self.ui.dataBitsChooser.addItems(
-            QtSerialPort.QSerialPort.DataBits.values.keys()
+            dataBits
+            for dataBits
+            in QtSerialPort.QSerialPort.DataBits.values.keys()
+            if dataBits.startswith('Data')
         )
         # self.ui.dataBitsChooser.setCurrentText('Data7')
         self.ui.stopBitsChooser.addItems(
-            QtSerialPort.QSerialPort.StopBits.values.keys()
+            stopBits
+            for stopBits
+            in QtSerialPort.QSerialPort.StopBits.values.keys()
+            if not stopBits.startswith('Unknown')
         )
         # self.ui.stopBitsChooser.setCurrentText('TwoStop')
         self.ui.flowControlChooser.addItems(
-            QtSerialPort.QSerialPort.FlowControl.values.keys()
+            flowControl
+            for flowControl
+            in QtSerialPort.QSerialPort.FlowControl.values.keys()
+            if not flowControl.startswith('Unknown')
         )
         # self.ui.flowControlChooser.setCurrentText('SoftwareControl')
 
