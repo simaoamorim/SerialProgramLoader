@@ -136,8 +136,8 @@ class ConfirmSend(QtWidgets.QDialog):
 
 
 class Loader(QtWidgets.QWidget):
-    def __init__(self):
-        super(Loader, self).__init__()
+    def __init__(self, parent = None):
+        super(Loader, self).__init__(parent=parent)
         self.ui = Ui_Loader()
         self.ui.setupUi(self)
         self.dir = QtCore.QDir(QtCore.QDir.currentPath()+'/programs/')
@@ -243,7 +243,10 @@ class SerialProgramLoader(QtWidgets.QMainWindow):
         super(SerialProgramLoader, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.ui.loaderTabLayout.addWidget(Loader())
+        self.ui.loaderFrameLayout = QtWidgets.QVBoxLayout(self.ui.loaderFrame)
+        self.ui.loaderFrameLayout.setMargin(0)
+        self.ui.loaderFrame.setLayout(self.ui.loaderFrameLayout)
+        self.ui.loaderFrameLayout.addWidget(Loader(self))
 
 
 if __name__ == '__main__':

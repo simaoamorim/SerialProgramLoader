@@ -36,23 +36,22 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
 
-        self.tabWidget = QTabWidget(self.centralwidget)
-        self.tabWidget.setObjectName(u"tabWidget")
-        self.loaderTab = QWidget()
-        self.loaderTab.setObjectName(u"loaderTab")
-        self.loaderTabLayout = QVBoxLayout(self.loaderTab)
-        self.loaderTabLayout.setObjectName(u"loaderTabLayout")
-        self.tabWidget.addTab(self.loaderTab, "")
+        self.loaderFrame = QFrame(self.centralwidget)
+        self.loaderFrame.setObjectName(u"loaderFrame")
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.loaderFrame.sizePolicy().hasHeightForWidth())
+        self.loaderFrame.setSizePolicy(sizePolicy)
+        self.loaderFrame.setFrameShape(QFrame.StyledPanel)
+        self.loaderFrame.setFrameShadow(QFrame.Raised)
 
-        self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.loaderFrame, 0, 0, 1, 1)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
         self.exitButton.clicked.connect(MainWindow.close)
-
-        self.tabWidget.setCurrentIndex(0)
-
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -60,6 +59,5 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.exitButton.setText(QCoreApplication.translate("MainWindow", u"Exit", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.loaderTab), QCoreApplication.translate("MainWindow", u"Loader", None))
     # retranslateUi
 
