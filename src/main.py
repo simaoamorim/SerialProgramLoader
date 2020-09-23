@@ -22,9 +22,9 @@
 
 import sys
 
-from PySide2.QtCore import QByteArray, QDir, QFileSystemWatcher, QThread, \
+from PySide2.QtCore import QDir, QFileSystemWatcher, QThread, \
     QObject, QSettings, QCommandLineOption, QCommandLineParser, QTimerEvent, \
-    QBasicMutex
+    QBasicMutex, QFile
 from PySide2.QtSerialPort import QSerialPort, QSerialPortInfo
 from PySide2.QtWidgets import QMessageBox, QApplication, QVBoxLayout, \
     QMainWindow, QDialog, QWidget
@@ -77,11 +77,9 @@ class Sender(QThread):
         self.parity = QSerialPort.Parity.values.get(parity)
         self.stopbits = QSerialPort.StopBits.values.get(stopbits)
         self.flowcontrol = QSerialPort.FlowControl.values.get(flowcontrol)
-        with open(self.filepath, 'r') as file:
-            file.seek(0, 2)
-            self._size = file.tell()
-            file.seek(0, 0)
-        self._size_sum = int(0)
+        self.file = QFile(self.filepath, self)
+        self.error = 0
+        self.errorString = 'Unknown error'
         self.mutex = QBasicMutex()
         try:
             self.port = QSerialPort(portname, self)
@@ -96,29 +94,23 @@ class Sender(QThread):
     def run(self):
         self.port.open(self.port.ReadWrite)
         if not self.port.isOpen():
-            print('Error %s' % self.port.error())
-            print(self.port.errorString())
+            self.error = self.port.error()
+            self.errorString = self.port.errorString()
             return
-        with open(self.filepath, 'r') as file:
-            self.port.write(QByteArray('%'.encode('utf-8')))
+        self.file.open(QFile.ReadOnly)
+        while not self.file.atEnd():
+            self.mutex.lock()
+            line = self.file.readLine()
+            self.mutex.unlock()
+            self.port.write(line)
+            print(str(line))
             self.port.waitForBytesWritten()
-            for line in file.readlines():
-                self.port.write(QByteArray(line.encode('UTF-8')))
-                self.port.waitForBytesWritten()
-                print(line, end='')
-                self.mutex.lock()
-                self._size_sum += len(line) + 1
-                self.mutex.unlock()
-            self.port.write(QByteArray('%'.encode('utf-8')))
-            self.port.waitForBytesWritten()
+        self.file.close()
         self.port.close()
 
     def get_status(self) -> int:
         self.mutex.lock()
-        try:
-            tmp = self._size_sum * 100 // self._size
-        except ZeroDivisionError:
-            tmp = 0
+        tmp = self.file.pos() * 100 // self.file.size()
         self.mutex.unlock()
         return tmp
 
@@ -146,15 +138,18 @@ class SendStatus(QDialog):
 
     def timerEvent(self, event: QTimerEvent):
         event.accept()
-        self.update_status(self.sender.get_status())
-        if self.sender.isFinished() and self.ui.progressBar.value() != 100:
+        status = self.sender.get_status()
+        if self.sender.isFinished() and self.sender.error != 0:
             self.killTimer(self.timer_id)
             QMessageBox.critical(
                 self,
                 'Error',
-                self.sender.port.errorString()
+                self.sender.errorString
             )
             self.close()
+        elif self.sender.isFinished():
+            status = 100
+        self.update_status(status)
 
 
 class ConfirmSend(QDialog):
