@@ -61,11 +61,6 @@ class Ui_Loader(object):
 
         self.serialPortConfigurationBox.setWidget(0, QFormLayout.LabelRole, self.baudrate_label)
 
-        self.baudrateChooser = QComboBox(self.groupBox)
-        self.baudrateChooser.setObjectName(u"baudrateChooser")
-
-        self.serialPortConfigurationBox.setWidget(0, QFormLayout.FieldRole, self.baudrateChooser)
-
         self.parity_label = QLabel(self.groupBox)
         self.parity_label.setObjectName(u"parity_label")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
@@ -112,6 +107,11 @@ class Ui_Loader(object):
         self.label.setObjectName(u"label")
 
         self.serialPortConfigurationBox.setWidget(4, QFormLayout.LabelRole, self.label)
+
+        self.baudRateInput = QLineEdit(self.groupBox)
+        self.baudRateInput.setObjectName(u"baudRateInput")
+
+        self.serialPortConfigurationBox.setWidget(0, QFormLayout.FieldRole, self.baudRateInput)
 
 
         self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.groupBox)

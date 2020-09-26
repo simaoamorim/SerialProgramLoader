@@ -99,9 +99,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="baudrateChooser"/>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="parity_label">
            <property name="sizePolicy">
@@ -153,6 +150,9 @@
             <string>Flow Control:</string>
            </property>
           </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="baudRateInput"/>
          </item>
         </layout>
        </widget>

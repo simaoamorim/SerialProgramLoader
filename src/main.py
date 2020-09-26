@@ -25,14 +25,39 @@ import sys
 from PySide2.QtCore import QDir, QFileSystemWatcher, QThread, \
     QObject, QSettings, QCommandLineOption, QCommandLineParser, QTimerEvent, \
     QBasicMutex, QFile
-from PySide2.QtSerialPort import QSerialPort, QSerialPortInfo
 from PySide2.QtWidgets import QMessageBox, QApplication, QVBoxLayout, \
     QMainWindow, QDialog, QWidget
+import serial
+from serial import Serial
+from serial.tools import list_ports
 
 from ui.confirm_send import Ui_confirmSend
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
 from ui.send_status import Ui_sendStatus
+
+
+parities = {
+    'None': serial.PARITY_NONE,
+    'Even': serial.PARITY_EVEN,
+    'Odd': serial.PARITY_ODD
+}
+bytesize = {
+    '5': serial.FIVEBITS,
+    '6': serial.SIXBITS,
+    '7': serial.SEVENBITS,
+    '8': serial.EIGHTBITS
+}
+stopbits = {
+    '1': serial.STOPBITS_ONE,
+    '1.5': serial.STOPBITS_ONE_POINT_FIVE,
+    '2': serial.STOPBITS_TWO
+}
+flowcontrol = [
+    'None',
+    'SoftwareControl',
+    'HardwareControl'
+]
 
 
 def save_port(port: str):
@@ -51,51 +76,58 @@ def save_databits(databits: str):
     globalSettings.setValue('serialport/databits', databits)
 
 
-def save_stopbits(stopbits: str):
-    globalSettings.setValue('serialport/stopbits', stopbits)
+def save_stopbits(stopbits_: str):
+    globalSettings.setValue('serialport/stopbits', stopbits_)
 
 
-def save_flowcontrol(flowcontrol: str):
-    globalSettings.setValue('serialport/flowcontrol', flowcontrol)
+def save_flowcontrol(flowcontrol_: str):
+    globalSettings.setValue('serialport/flowcontrol', flowcontrol_)
 
 
 class Sender(QThread):
     def __init__(self,
                  portname: str,
                  filepath: str,
-                 baudrate: str,
+                 baudrate: int,
                  databits: str,
                  parity: str,
-                 stopbits: str,
-                 flowcontrol: str,
+                 stopbits_: str,
+                 flowcontrol_: str,
                  parent: QObject = None
                  ):
         super(Sender, self).__init__(parent)
         self.filepath = filepath
-        self.baudrate = QSerialPort.BaudRate.values.get(baudrate)
-        self.databits = QSerialPort.DataBits.values.get(databits)
-        self.parity = QSerialPort.Parity.values.get(parity)
-        self.stopbits = QSerialPort.StopBits.values.get(stopbits)
-        self.flowcontrol = QSerialPort.FlowControl.values.get(flowcontrol)
         self.file = QFile(self.filepath, self)
         self.error = 0
         self.errorString = 'Unknown error'
         self.mutex = QBasicMutex()
-        try:
-            self.port = QSerialPort(portname, self)
-            self.port.setBaudRate(self.baudrate)
-            self.port.setDataBits(self.databits)
-            self.port.setParity(self.parity)
-            self.port.setStopBits(self.stopbits)
-            self.port.setFlowControl(self.flowcontrol)
-        except QSerialPort.DeviceNotFoundError as e:
-            raise ValueError(e)
+        self.portname = '/dev/' + portname
+        self.baudrate = baudrate
+        self.bytesize = bytesize.get(databits)
+        self.parity = parities.get(parity)
+        self.stopbits = stopbits.get(stopbits_)
+        print(self.bytesize, self.parity, self.stopbits)
+        self.flowcontrol = flowcontrol_
+        self.xonoff = (self.flowcontrol == 'SoftwareControl')
+        print('self.xonoff = %s' % self.xonoff)
+        self.rtscts = (self.flowcontrol == 'HardwareControl')
+        print('self.rtscts = %s' % self.rtscts)
+        self.port = Serial(
+            port=self.portname,
+            baudrate=self.baudrate,
+            parity=self.parity,
+            stopbits=self.stopbits,
+            bytesize=self.bytesize,
+            xonxoff=self.xonoff,
+            rtscts=self.rtscts,
+            dsrdtr=False,
+            timeout=None
+        )
 
     def run(self):
-        self.port.open(self.port.ReadWrite)
+        # self.port.open()
         if not self.port.isOpen():
-            self.error = self.port.error()
-            self.errorString = self.port.errorString()
+            self.errorString = ("Could not open port %s" % self.portname)
             return
         self.file.open(QFile.ReadOnly)
         while not self.file.atEnd():
@@ -104,7 +136,8 @@ class Sender(QThread):
             self.mutex.unlock()
             self.port.write(line)
             print(str(line))
-            self.port.waitForBytesWritten()
+            self.port.flush()
+            # self.port.waitForBytesWritten()
         self.file.close()
         self.port.close()
 
@@ -171,21 +204,21 @@ class Loader(QWidget):
         self.fs_watcher.directoryChanged.connect(self.update_program_list)
         self.send_status = SendStatus
         self.sender = Sender
-        self.serialproperties = \
+        self.serialpropertiesvalues = \
             {
-                'baudrate': QSerialPort.BaudRate,
-                'parity': QSerialPort.Parity,
-                'databits': QSerialPort.DataBits,
-                'stopbits': QSerialPort.StopBits,
-                'flowcontrol': QSerialPort.FlowControl
+                'baudrate': Serial.BAUDRATES,
+                'parity': Serial.PARITIES,
+                'databits': Serial.BYTESIZES,
+                'stopbits': Serial.STOPBITS,
+                'flowcontrol': ['NoControl', 'SoftwareControl', 'HardwareControl']
             }
-        self.serialpropertiesvalues = {}
-        for (key, val) in self.serialproperties.items():
-            self.serialpropertiesvalues[key] = \
-                (
-                    value for value in val.values.keys()
-                    if not value.startswith('Unknown')
-                )
+        # self.serialpropertiesvalues = {}
+        # for (key, val) in self.serialproperties.items():
+        #     self.serialpropertiesvalues[key] = \
+        #         (
+        #             value for value in val.values.keys()
+        #             if not value.startswith('Unknown')
+        #         )
 
         self.update_program_list()
         self.update_serial_port_list()
@@ -198,27 +231,28 @@ class Loader(QWidget):
         self.ui.serialPortChooser.currentTextChanged.connect(
             self.selection_changed)
         self.ui.serialPortChooser.currentTextChanged.connect(save_port)
-        self.ui.baudrateChooser.currentTextChanged.connect(save_baud)
+        # self.ui.baudrateChooser.currentTextChanged.connect(save_baud)
+        self.ui.baudRateInput.textChanged.connect(save_baud)
         self.ui.parityChooser.currentTextChanged.connect(save_parity)
         self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
         self.ui.stopBitsChooser.currentTextChanged.connect(save_stopbits)
         self.ui.flowControlChooser.currentTextChanged.connect(save_flowcontrol)
 
     def set_serial_port_options(self):
-        self.ui.baudrateChooser.addItems(
-            self.serialpropertiesvalues.get('baudrate')
-        )
+        # self.ui.baudrateChooser.addItems(
+        #     self.serialpropertiesvalues.get('baudrate')
+        # )
         self.ui.parityChooser.addItems(
-            self.serialpropertiesvalues.get('parity')
+            parities.keys()
         )
         self.ui.dataBitsChooser.addItems(
-            self.serialpropertiesvalues.get('databits')
+            bytesize.keys()
         )
         self.ui.stopBitsChooser.addItems(
-            self.serialpropertiesvalues.get('stopbits')
+            stopbits.keys()
         )
         self.ui.flowControlChooser.addItems(
-            self.serialpropertiesvalues.get('flowcontrol')
+            flowcontrol
         )
         if globalSettings.contains('serialport/port'):
             self.selectpreviousvalues()
@@ -229,7 +263,10 @@ class Loader(QWidget):
         self.ui.serialPortChooser.setCurrentText(
             globalSettings.value('serialport/port')
         )
-        self.ui.baudrateChooser.setCurrentText(
+        # self.ui.baudrateChooser.setCurrentText(
+        #     globalSettings.value('serialport/baudrate')
+        # )
+        self.ui.baudRateInput.setText(
             globalSettings.value('serialport/baudrate')
         )
         self.ui.parityChooser.setCurrentText(
@@ -247,7 +284,7 @@ class Loader(QWidget):
 
     def saveconfig(self):
         save_port(self.ui.serialPortChooser.currentText())
-        save_baud(self.ui.baudrateChooser.currentText())
+        save_baud(self.ui.baudRateInput.text())
         save_parity(self.ui.parityChooser.currentText())
         save_databits(self.ui.dataBitsChooser.currentText())
         save_stopbits(self.ui.stopBitsChooser.currentText())
@@ -255,8 +292,8 @@ class Loader(QWidget):
 
     def update_serial_port_list(self):
         self.ui.serialPortChooser.clear()
-        for port in QSerialPortInfo.availablePorts():
-            self.ui.serialPortChooser.addItem(port.portName())
+        for port in list_ports.comports():
+            self.ui.serialPortChooser.addItem(port.name)
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
@@ -290,7 +327,7 @@ class Loader(QWidget):
                 self.sender = Sender(
                     port_chosen,
                     filepath,
-                    self.ui.baudrateChooser.currentText(),
+                    self.ui.baudRateInput.text(),
                     self.ui.dataBitsChooser.currentText(),
                     self.ui.parityChooser.currentText(),
                     self.ui.stopBitsChooser.currentText(),
