@@ -19,7 +19,7 @@ class Ui_Loader(object):
             Loader.setObjectName(u"Loader")
         Loader.resize(480, 320)
         font = QFont()
-        font.setPointSize(8)
+        font.setPointSize(12)
         Loader.setFont(font)
         Loader.setLocale(QLocale(QLocale.English, QLocale.UnitedKingdom))
         self.gridLayout_2 = QGridLayout(Loader)
@@ -128,6 +128,12 @@ class Ui_Loader(object):
         self.sendButton = QPushButton(self.frame)
         self.sendButton.setObjectName(u"sendButton")
         self.sendButton.setEnabled(False)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.sendButton.sizePolicy().hasHeightForWidth())
+        self.sendButton.setSizePolicy(sizePolicy2)
+        self.sendButton.setMinimumSize(QSize(0, 50))
 
         self.formLayout.setWidget(5, QFormLayout.SpanningRole, self.sendButton)
 
@@ -136,9 +142,6 @@ class Ui_Loader(object):
 
         self.programListWidget = QListWidget(Loader)
         self.programListWidget.setObjectName(u"programListWidget")
-        sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.programListWidget.sizePolicy().hasHeightForWidth())
         self.programListWidget.setSizePolicy(sizePolicy2)
         self.programListWidget.setSelectionRectVisible(True)
