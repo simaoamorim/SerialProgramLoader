@@ -242,9 +242,10 @@ class Loader(QWidget):
         # self.ui.baudrateChooser.addItems(
         #     self.serialpropertiesvalues.get('baudrate')
         # )
-        self.ui.parityChooser.addItems(
-            parities.keys()
-        )
+        for key in parities.keys():
+            self.ui.parityChooser.addItem(
+                key
+            )
         self.ui.dataBitsChooser.addItems(
             bytesize.keys()
         )
