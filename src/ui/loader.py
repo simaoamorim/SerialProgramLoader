@@ -17,7 +17,7 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(382, 480)
+        Loader.resize(320, 480)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -161,7 +161,7 @@ class Ui_Loader(object):
         self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
         self.gridLayout.setColumnStretch(1, 1)
-        self.gridLayout.setColumnMinimumWidth(1, 220)
+        self.gridLayout.setColumnMinimumWidth(1, 200)
 
         self.retranslateUi(Loader)
 
