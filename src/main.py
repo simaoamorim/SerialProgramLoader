@@ -134,7 +134,7 @@ class Sender(QThread):
             self.mutex.lock()
             line = self.file.readLine()
             self.mutex.unlock()
-            self.port.write(line)
+            self.port.write(bytes(line.data()))
             print(str(line))
             self.port.flush()
             # self.port.waitForBytesWritten()
