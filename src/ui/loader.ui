@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>483</width>
-    <height>384</height>
+    <width>382</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,7 +27,7 @@
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1" columnminimumwidth="0,300">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1" columnminimumwidth="0,220">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -84,7 +84,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>30</height>
+          <height>35</height>
          </size>
         </property>
         <property name="text">
@@ -104,7 +104,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>30</height>
+          <height>35</height>
          </size>
         </property>
        </widget>
@@ -161,7 +161,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>30</height>
+             <height>35</height>
             </size>
            </property>
           </widget>
@@ -181,7 +181,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>30</height>
+             <height>35</height>
             </size>
            </property>
           </widget>
@@ -201,7 +201,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>30</height>
+             <height>35</height>
             </size>
            </property>
           </widget>
@@ -211,7 +211,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>30</height>
+             <height>35</height>
             </size>
            </property>
           </widget>
@@ -228,7 +228,7 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>30</height>
+             <height>35</height>
             </size>
            </property>
           </widget>

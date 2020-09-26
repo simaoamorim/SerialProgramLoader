@@ -17,7 +17,7 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(483, 384)
+        Loader.resize(382, 480)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -52,7 +52,7 @@ class Ui_Loader(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.updateProgramListButton.sizePolicy().hasHeightForWidth())
         self.updateProgramListButton.setSizePolicy(sizePolicy1)
-        self.updateProgramListButton.setMinimumSize(QSize(0, 30))
+        self.updateProgramListButton.setMinimumSize(QSize(0, 35))
 
         self.formLayout.setWidget(1, QFormLayout.SpanningRole, self.updateProgramListButton)
 
@@ -63,7 +63,7 @@ class Ui_Loader(object):
 
         self.serialPortChooser = QComboBox(self.frame)
         self.serialPortChooser.setObjectName(u"serialPortChooser")
-        self.serialPortChooser.setMinimumSize(QSize(0, 30))
+        self.serialPortChooser.setMinimumSize(QSize(0, 35))
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.serialPortChooser)
 
@@ -98,7 +98,7 @@ class Ui_Loader(object):
 
         self.parityChooser = QComboBox(self.groupBox)
         self.parityChooser.setObjectName(u"parityChooser")
-        self.parityChooser.setMinimumSize(QSize(0, 30))
+        self.parityChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(1, QFormLayout.FieldRole, self.parityChooser)
 
@@ -110,7 +110,7 @@ class Ui_Loader(object):
 
         self.dataBitsChooser = QComboBox(self.groupBox)
         self.dataBitsChooser.setObjectName(u"dataBitsChooser")
-        self.dataBitsChooser.setMinimumSize(QSize(0, 30))
+        self.dataBitsChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(2, QFormLayout.FieldRole, self.dataBitsChooser)
 
@@ -122,13 +122,13 @@ class Ui_Loader(object):
 
         self.stopBitsChooser = QComboBox(self.groupBox)
         self.stopBitsChooser.setObjectName(u"stopBitsChooser")
-        self.stopBitsChooser.setMinimumSize(QSize(0, 30))
+        self.stopBitsChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(3, QFormLayout.FieldRole, self.stopBitsChooser)
 
         self.flowControlChooser = QComboBox(self.groupBox)
         self.flowControlChooser.setObjectName(u"flowControlChooser")
-        self.flowControlChooser.setMinimumSize(QSize(0, 30))
+        self.flowControlChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(4, QFormLayout.FieldRole, self.flowControlChooser)
 
@@ -139,7 +139,7 @@ class Ui_Loader(object):
 
         self.baudRateInput = QLineEdit(self.groupBox)
         self.baudRateInput.setObjectName(u"baudRateInput")
-        self.baudRateInput.setMinimumSize(QSize(0, 30))
+        self.baudRateInput.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(0, QFormLayout.FieldRole, self.baudRateInput)
 
@@ -161,7 +161,7 @@ class Ui_Loader(object):
         self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
         self.gridLayout.setColumnStretch(1, 1)
-        self.gridLayout.setColumnMinimumWidth(1, 300)
+        self.gridLayout.setColumnMinimumWidth(1, 220)
 
         self.retranslateUi(Loader)
 
