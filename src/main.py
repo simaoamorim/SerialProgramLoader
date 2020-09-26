@@ -246,15 +246,18 @@ class Loader(QWidget):
             self.ui.parityChooser.addItem(
                 key
             )
-        self.ui.dataBitsChooser.addItems(
-            bytesize.keys()
-        )
-        self.ui.stopBitsChooser.addItems(
-            stopbits.keys()
-        )
-        self.ui.flowControlChooser.addItems(
-            flowcontrol
-        )
+        for key in bytesize.keys():
+            self.ui.dataBitsChooser.addItem(
+                key
+            )
+        for key in stopbits.keys():
+            self.ui.stopBitsChooser.addItem(
+                key
+            )
+        for key in flowcontrol:
+            self.ui.flowControlChooser.addItems(
+                key
+            )
         if globalSettings.contains('serialport/port'):
             self.selectpreviousvalues()
         else:
