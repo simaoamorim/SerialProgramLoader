@@ -22,6 +22,9 @@
    <locale language="English" country="UnitedKingdom"/>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetNoConstraint</enum>
+   </property>
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -34,8 +37,17 @@
    <property name="bottomMargin">
     <number>4</number>
    </property>
+   <property name="spacing">
+    <number>4</number>
+   </property>
    <item row="0" column="1">
     <widget class="QFrame" name="frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <layout class="QFormLayout" name="formLayout">
       <property name="horizontalSpacing">
        <number>7</number>
@@ -209,6 +221,15 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="isWrapping" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="resizeMode">
+      <enum>QListView::Adjust</enum>
+     </property>
+     <property name="spacing">
+      <number>10</number>
      </property>
      <property name="selectionRectVisible">
       <bool>true</bool>
