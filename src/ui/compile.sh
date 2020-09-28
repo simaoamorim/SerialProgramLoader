@@ -28,4 +28,3 @@
 pyside2-uic main.ui -o main.py
 pyside2-uic loader.ui -o loader.py
 pyside2-uic confirm_send.ui -o confirm_send.py
-pyside2-uic send_status.ui -o send_status.py
