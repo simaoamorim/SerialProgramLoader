@@ -22,11 +22,11 @@
 
 import sys
 
-from PySide2.QtCore import QDir, QFileSystemWatcher, QThread, \
-    QObject, QSettings, QCommandLineOption, QCommandLineParser, QTimerEvent, \
-    QBasicMutex, QFile
-from PySide2.QtWidgets import QMessageBox, QApplication, QVBoxLayout, \
-    QMainWindow, QDialog, QWidget
+from PySide2.QtCore import QDir, QFileSystemWatcher, QThreadPool, \
+    QObject, QSettings, QCommandLineOption, QCommandLineParser, \
+    QFile, QRunnable, Slot, Signal
+from PySide2.QtWidgets import QApplication, QVBoxLayout, \
+    QMainWindow, QDialog, QWidget, QProgressDialog
 import serial
 from serial import Serial
 from serial.tools import list_ports
@@ -34,7 +34,6 @@ from serial.tools import list_ports
 from ui.confirm_send import Ui_confirmSend
 from ui.loader import Ui_Loader
 from ui.main import Ui_MainWindow
-from ui.send_status import Ui_sendStatus
 
 
 parities = {
@@ -84,7 +83,10 @@ def save_flowcontrol(flowcontrol_: str):
     globalSettings.setValue('serialport/flowcontrol', flowcontrol_)
 
 
-class Sender(QThread):
+class Sender(QRunnable):
+    class Signals(QObject):
+        update_status = Signal(int)
+
     def __init__(self,
                  portname: str,
                  filepath: str,
@@ -96,11 +98,9 @@ class Sender(QThread):
                  parent: QObject = None
                  ):
         super(Sender, self).__init__(parent)
-        self.filepath = filepath
-        self.file = QFile(self.filepath, self)
-        self.error = 0
+        self.file = QFile(filepath)
         self.errorString = 'Unknown error'
-        self.mutex = QBasicMutex()
+        self.signals = self.Signals()
         self.portname = portname
         self.baudrate = baudrate
         self.bytesize = bytesize.get(databits)
@@ -121,8 +121,9 @@ class Sender(QThread):
             xonxoff=self.xonoff,
             rtscts=self.rtscts,
             dsrdtr=False,
-            timeout=None
+            timeout=0.1  # 0.1s
         )
+        self.cancelled = False
 
     def run(self):
         # self.port.open()
@@ -130,59 +131,26 @@ class Sender(QThread):
             self.errorString = ("Could not open port %s" % self.portname)
             return
         self.file.open(QFile.ReadOnly)
-        while not self.file.atEnd():
-            self.mutex.lock()
-            line = self.file.readLine()
-            self.mutex.unlock()
-            self.port.write(bytes(line.data()))
-            print(str(line))
+        line = self.file.readLine()
+        while not self.file.atEnd() and not self.cancelled:
+            if self.port.write(bytes(line.data())) > 0:
+                line = self.file.readLine()
+                print(str(line))
+                self.signals.update_status.emit(
+                    self.file.pos()
+                )
+                self.port.flush()
+        if self.cancelled:
+            self.port.reset_output_buffer()
+        else:
             self.port.flush()
-            # self.port.waitForBytesWritten()
+            self.signals.update_status.emit(100)
         self.file.close()
         self.port.close()
 
-    def get_status(self) -> int:
-        self.mutex.lock()
-        tmp = self.file.pos() * 100 // self.file.size()
-        self.mutex.unlock()
-        return tmp
-
-
-class SendStatus(QDialog):
-    def __init__(self,
-                 parent: QObject = None,
-                 sender: Sender = None
-                 ):
-        super(SendStatus, self).__init__(parent)
-        self.sender = sender
-        self.ui = Ui_sendStatus()
-        self.ui.setupUi(self)
-        if self.sender is not None:
-            self.timer_id = self.startTimer(500)
-        else:
-            self.ui.progressBar.setVisible(False)
-
-    def update_status(self, status):
-        self.ui.progressBar.setValue(status)
-        if status == 100:
-            self.ui.buttonBox.setEnabled(True)
-            self.killTimer(self.timer_id)
-        self.update()
-
-    def timerEvent(self, event: QTimerEvent):
-        event.accept()
-        status = self.sender.get_status()
-        if self.sender.isFinished() and self.sender.error != 0:
-            self.killTimer(self.timer_id)
-            QMessageBox.critical(
-                self,
-                'Error',
-                self.sender.errorString
-            )
-            self.close()
-        elif self.sender.isFinished():
-            status = 100
-        self.update_status(status)
+    @Slot()
+    def cancel(self):
+        self.cancelled = True
 
 
 class ConfirmSend(QDialog):
@@ -202,7 +170,7 @@ class Loader(QWidget):
         self.fs_watcher = QFileSystemWatcher(self.dir.path())
         self.fs_watcher.addPath(self.dir.path())
         self.fs_watcher.directoryChanged.connect(self.update_program_list)
-        self.send_status = SendStatus
+        self.send_status = QProgressDialog
         self.sender = Sender
         self.serialpropertiesvalues = \
             {
@@ -237,6 +205,7 @@ class Loader(QWidget):
         self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
         self.ui.stopBitsChooser.currentTextChanged.connect(save_stopbits)
         self.ui.flowControlChooser.currentTextChanged.connect(save_flowcontrol)
+        self.thread_pool = QThreadPool()
 
     def set_serial_port_options(self):
         # self.ui.baudrateChooser.addItems(
@@ -327,6 +296,7 @@ class Loader(QWidget):
             confirm.ui.dialogLabel.setText(f'Send program \'{filename}\'?')
             confirm.exec()
             if confirm.result() == QDialog.Accepted:
+                self.send_status = QProgressDialog(self)
                 self.sender = Sender(
                     port_chosen,
                     filepath,
@@ -334,11 +304,12 @@ class Loader(QWidget):
                     self.ui.dataBitsChooser.currentText(),
                     self.ui.parityChooser.currentText(),
                     self.ui.stopBitsChooser.currentText(),
-                    self.ui.flowControlChooser.currentText()
+                    self.ui.flowControlChooser.currentText(),
+                    self
                 )
-                self.send_status = SendStatus(self, self.sender)
-                self.send_status.show()
-                self.sender.start()
+                self.send_status.canceled.connect(self.sender.cancel)
+                self.sender.signals.update_status.connect(self.send_status.setValue)
+                self.thread_pool.start(self.sender)
                 self.send_status.exec_()
                 self.send_status.deleteLater()
 
@@ -360,9 +331,13 @@ if __name__ == '__main__':
     app.setApplicationName('Serial Program Loader')
     app.setApplicationVersion('0.0.0')
     parser = QCommandLineParser()
-    parser.setApplicationDescription('Program to send Machining routines to '
-                                     'CNC machines via serial port')
-    startFullScreen = QCommandLineOption(('f', 'fullscreen'), "Start in fullscreen mode")
+    parser.setApplicationDescription(
+        'Program to send Machining routines to CNC machines via serial port'
+    )
+    startFullScreen = QCommandLineOption(
+        ('f', 'fullscreen'),
+        "Start in fullscreen mode"
+    )
     parser.addOption(startFullScreen)
     parser.addHelpOption()
     parser.addVersionOption()
