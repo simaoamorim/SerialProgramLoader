@@ -101,7 +101,7 @@ class Sender(QThread):
         self.error = 0
         self.errorString = 'Unknown error'
         self.mutex = QBasicMutex()
-        self.portname = '/dev/' + portname
+        self.portname = portname
         self.baudrate = baudrate
         self.bytesize = bytesize.get(databits)
         self.parity = parities.get(parity)
@@ -296,7 +296,7 @@ class Loader(QWidget):
     def update_serial_port_list(self):
         self.ui.serialPortChooser.clear()
         for port in list_ports.comports():
-            self.ui.serialPortChooser.addItem(port.name)
+            self.ui.serialPortChooser.addItem(port.device)
 
     def update_program_list(self):
         self.ui.programListWidget.clear()
