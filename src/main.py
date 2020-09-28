@@ -106,12 +106,9 @@ class Sender(QRunnable):
         self.bytesize = bytesize.get(databits)
         self.parity = parities.get(parity)
         self.stopbits = stopbits.get(stopbits_)
-        print(self.bytesize, self.parity, self.stopbits)
         self.flowcontrol = flowcontrol_
         self.xonoff = (self.flowcontrol == 'SoftwareControl')
-        print('self.xonoff = %s' % self.xonoff)
         self.rtscts = (self.flowcontrol == 'HardwareControl')
-        print('self.rtscts = %s' % self.rtscts)
         self.port = Serial(
             port=self.portname,
             baudrate=self.baudrate,
@@ -126,7 +123,6 @@ class Sender(QRunnable):
         self.cancelled = False
 
     def run(self):
-        # self.port.open()
         if not self.port.isOpen():
             self.errorString = ("Could not open port %s" % self.portname)
             return
@@ -180,13 +176,6 @@ class Loader(QWidget):
                 'stopbits': Serial.STOPBITS,
                 'flowcontrol': ['NoControl', 'SoftwareControl', 'HardwareControl']
             }
-        # self.serialpropertiesvalues = {}
-        # for (key, val) in self.serialproperties.items():
-        #     self.serialpropertiesvalues[key] = \
-        #         (
-        #             value for value in val.values.keys()
-        #             if not value.startswith('Unknown')
-        #         )
 
         self.update_program_list()
         self.update_serial_port_list()
@@ -199,7 +188,6 @@ class Loader(QWidget):
         self.ui.serialPortChooser.currentTextChanged.connect(
             self.selection_changed)
         self.ui.serialPortChooser.currentTextChanged.connect(save_port)
-        # self.ui.baudrateChooser.currentTextChanged.connect(save_baud)
         self.ui.baudRateInput.textChanged.connect(save_baud)
         self.ui.parityChooser.currentTextChanged.connect(save_parity)
         self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
@@ -208,9 +196,6 @@ class Loader(QWidget):
         self.thread_pool = QThreadPool()
 
     def set_serial_port_options(self):
-        # self.ui.baudrateChooser.addItems(
-        #     self.serialpropertiesvalues.get('baudrate')
-        # )
         for key in parities.keys():
             self.ui.parityChooser.addItem(
                 key
@@ -235,9 +220,6 @@ class Loader(QWidget):
         self.ui.serialPortChooser.setCurrentText(
             globalSettings.value('serialport/port')
         )
-        # self.ui.baudrateChooser.setCurrentText(
-        #     globalSettings.value('serialport/baudrate')
-        # )
         self.ui.baudRateInput.setText(
             globalSettings.value('serialport/baudrate')
         )
