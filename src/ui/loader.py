@@ -17,21 +17,49 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(480, 320)
+        Loader.resize(320, 480)
+        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Loader.sizePolicy().hasHeightForWidth())
+        Loader.setSizePolicy(sizePolicy)
         font = QFont()
-        font.setPointSize(8)
+        font.setPointSize(9)
         Loader.setFont(font)
         Loader.setLocale(QLocale(QLocale.English, QLocale.UnitedKingdom))
-        self.gridLayout_2 = QGridLayout(Loader)
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.gridLayout_2.setContentsMargins(4, 4, 4, 4)
+        self.gridLayout = QGridLayout(Loader)
+        self.gridLayout.setSpacing(4)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(4, 4, 4, 4)
+        self.programListWidget = QListWidget(Loader)
+        self.programListWidget.setObjectName(u"programListWidget")
+        self.programListWidget.setAlternatingRowColors(True)
+        self.programListWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.programListWidget.setProperty("isWrapping", True)
+        self.programListWidget.setSelectionRectVisible(True)
+
+        self.gridLayout.addWidget(self.programListWidget, 0, 0, 1, 1)
+
         self.frame = QFrame(Loader)
         self.frame.setObjectName(u"frame")
+        sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
+        self.frame.setSizePolicy(sizePolicy)
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setHorizontalSpacing(7)
         self.formLayout.setVerticalSpacing(7)
         self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.updateProgramListButton = QPushButton(self.frame)
+        self.updateProgramListButton.setObjectName(u"updateProgramListButton")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(1)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.updateProgramListButton.sizePolicy().hasHeightForWidth())
+        self.updateProgramListButton.setSizePolicy(sizePolicy1)
+        self.updateProgramListButton.setMinimumSize(QSize(0, 35))
+
+        self.formLayout.setWidget(1, QFormLayout.SpanningRole, self.updateProgramListButton)
+
         self.port_label = QLabel(self.frame)
         self.port_label.setObjectName(u"port_label")
 
@@ -39,16 +67,17 @@ class Ui_Loader(object):
 
         self.serialPortChooser = QComboBox(self.frame)
         self.serialPortChooser.setObjectName(u"serialPortChooser")
+        self.serialPortChooser.setMinimumSize(QSize(0, 35))
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.serialPortChooser)
 
         self.groupBox = QGroupBox(self.frame)
         self.groupBox.setObjectName(u"groupBox")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
-        self.groupBox.setSizePolicy(sizePolicy)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy2.setHorizontalStretch(1)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
+        self.groupBox.setSizePolicy(sizePolicy2)
         self.groupBox.setAlignment(Qt.AlignHCenter|Qt.AlignTop)
         self.groupBox.setCheckable(False)
         self.serialPortConfigurationBox = QFormLayout(self.groupBox)
@@ -61,23 +90,19 @@ class Ui_Loader(object):
 
         self.serialPortConfigurationBox.setWidget(0, QFormLayout.LabelRole, self.baudrate_label)
 
-        self.baudrateChooser = QComboBox(self.groupBox)
-        self.baudrateChooser.setObjectName(u"baudrateChooser")
-
-        self.serialPortConfigurationBox.setWidget(0, QFormLayout.FieldRole, self.baudrateChooser)
-
         self.parity_label = QLabel(self.groupBox)
         self.parity_label.setObjectName(u"parity_label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(1)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.parity_label.sizePolicy().hasHeightForWidth())
-        self.parity_label.setSizePolicy(sizePolicy1)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(1)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.parity_label.sizePolicy().hasHeightForWidth())
+        self.parity_label.setSizePolicy(sizePolicy3)
 
         self.serialPortConfigurationBox.setWidget(1, QFormLayout.LabelRole, self.parity_label)
 
         self.parityChooser = QComboBox(self.groupBox)
         self.parityChooser.setObjectName(u"parityChooser")
+        self.parityChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(1, QFormLayout.FieldRole, self.parityChooser)
 
@@ -89,6 +114,7 @@ class Ui_Loader(object):
 
         self.dataBitsChooser = QComboBox(self.groupBox)
         self.dataBitsChooser.setObjectName(u"dataBitsChooser")
+        self.dataBitsChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(2, QFormLayout.FieldRole, self.dataBitsChooser)
 
@@ -100,11 +126,13 @@ class Ui_Loader(object):
 
         self.stopBitsChooser = QComboBox(self.groupBox)
         self.stopBitsChooser.setObjectName(u"stopBitsChooser")
+        self.stopBitsChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(3, QFormLayout.FieldRole, self.stopBitsChooser)
 
         self.flowControlChooser = QComboBox(self.groupBox)
         self.flowControlChooser.setObjectName(u"flowControlChooser")
+        self.flowControlChooser.setMinimumSize(QSize(0, 35))
 
         self.serialPortConfigurationBox.setWidget(4, QFormLayout.FieldRole, self.flowControlChooser)
 
@@ -113,38 +141,31 @@ class Ui_Loader(object):
 
         self.serialPortConfigurationBox.setWidget(4, QFormLayout.LabelRole, self.label)
 
+        self.baudRateInput = QLineEdit(self.groupBox)
+        self.baudRateInput.setObjectName(u"baudRateInput")
+        self.baudRateInput.setMinimumSize(QSize(0, 35))
+
+        self.serialPortConfigurationBox.setWidget(0, QFormLayout.FieldRole, self.baudRateInput)
+
 
         self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.groupBox)
-
-        self.updateProgramListButton = QPushButton(self.frame)
-        self.updateProgramListButton.setObjectName(u"updateProgramListButton")
-
-        self.formLayout.setWidget(1, QFormLayout.SpanningRole, self.updateProgramListButton)
-
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.formLayout.setItem(4, QFormLayout.FieldRole, self.verticalSpacer)
 
         self.sendButton = QPushButton(self.frame)
         self.sendButton.setObjectName(u"sendButton")
         self.sendButton.setEnabled(False)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy4.setHorizontalStretch(1)
+        sizePolicy4.setVerticalStretch(1)
+        sizePolicy4.setHeightForWidth(self.sendButton.sizePolicy().hasHeightForWidth())
+        self.sendButton.setSizePolicy(sizePolicy4)
 
-        self.formLayout.setWidget(5, QFormLayout.SpanningRole, self.sendButton)
+        self.formLayout.setWidget(4, QFormLayout.SpanningRole, self.sendButton)
 
 
-        self.gridLayout_2.addWidget(self.frame, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
-        self.programListWidget = QListWidget(Loader)
-        self.programListWidget.setObjectName(u"programListWidget")
-        sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.programListWidget.sizePolicy().hasHeightForWidth())
-        self.programListWidget.setSizePolicy(sizePolicy2)
-        self.programListWidget.setSelectionRectVisible(True)
-
-        self.gridLayout_2.addWidget(self.programListWidget, 0, 0, 1, 1)
-
+        self.gridLayout.setColumnStretch(1, 1)
+        self.gridLayout.setColumnMinimumWidth(0, 110)
 
         self.retranslateUi(Loader)
 
@@ -153,6 +174,7 @@ class Ui_Loader(object):
 
     def retranslateUi(self, Loader):
         Loader.setWindowTitle(QCoreApplication.translate("Loader", u"Form", None))
+        self.updateProgramListButton.setText(QCoreApplication.translate("Loader", u"Refresh", None))
         self.port_label.setText(QCoreApplication.translate("Loader", u"Serial Port:", None))
         self.groupBox.setTitle(QCoreApplication.translate("Loader", u"Serial Port configuration", None))
         self.baudrate_label.setText(QCoreApplication.translate("Loader", u"Baudrate:", None))
@@ -160,7 +182,6 @@ class Ui_Loader(object):
         self.label_2.setText(QCoreApplication.translate("Loader", u"Data Bits:", None))
         self.label_3.setText(QCoreApplication.translate("Loader", u"Stop Bits:", None))
         self.label.setText(QCoreApplication.translate("Loader", u"Flow Control:", None))
-        self.updateProgramListButton.setText(QCoreApplication.translate("Loader", u"Refresh", None))
         self.sendButton.setText(QCoreApplication.translate("Loader", u"Send", None))
     # retranslateUi
 
