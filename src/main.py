@@ -128,14 +128,16 @@ class Sender(QRunnable):
             return
         self.file.open(QFile.ReadOnly)
         line = self.file.readLine()
-        while not self.file.atEnd() and not self.cancelled:
+        while not self.cancelled:
             if self.port.write(bytes(line.data())) > 0:
-                line = self.file.readLine()
                 print(str(line))
                 self.signals.update_status.emit(
                     self.file.pos()
                 )
-                self.port.flush()
+                if not self.file.atEnd():
+                    line = self.file.readLine()
+                else:
+                    break
         if self.cancelled:
             self.port.reset_output_buffer()
         else:
