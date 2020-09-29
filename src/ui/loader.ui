@@ -18,7 +18,7 @@
   </property>
   <property name="font">
    <font>
-    <pointsize>10</pointsize>
+    <pointsize>9</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -27,7 +27,7 @@
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1" columnminimumwidth="0,200">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1" columnminimumwidth="110,0">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -44,7 +44,20 @@
     <number>4</number>
    </property>
    <item row="0" column="0">
-    <widget class="QListWidget" name="programListWidget"/>
+    <widget class="QListWidget" name="programListWidget">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="isWrapping" stdset="0">
+      <bool>true</bool>
+     </property>
+     <property name="selectionRectVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item row="0" column="1">
     <widget class="QFrame" name="frame">

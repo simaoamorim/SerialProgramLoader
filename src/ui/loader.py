@@ -24,7 +24,7 @@ class Ui_Loader(object):
         sizePolicy.setHeightForWidth(Loader.sizePolicy().hasHeightForWidth())
         Loader.setSizePolicy(sizePolicy)
         font = QFont()
-        font.setPointSize(10)
+        font.setPointSize(9)
         Loader.setFont(font)
         Loader.setLocale(QLocale(QLocale.English, QLocale.UnitedKingdom))
         self.gridLayout = QGridLayout(Loader)
@@ -33,6 +33,10 @@ class Ui_Loader(object):
         self.gridLayout.setContentsMargins(4, 4, 4, 4)
         self.programListWidget = QListWidget(Loader)
         self.programListWidget.setObjectName(u"programListWidget")
+        self.programListWidget.setAlternatingRowColors(True)
+        self.programListWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.programListWidget.setProperty("isWrapping", True)
+        self.programListWidget.setSelectionRectVisible(True)
 
         self.gridLayout.addWidget(self.programListWidget, 0, 0, 1, 1)
 
@@ -161,7 +165,7 @@ class Ui_Loader(object):
         self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
         self.gridLayout.setColumnStretch(1, 1)
-        self.gridLayout.setColumnMinimumWidth(1, 200)
+        self.gridLayout.setColumnMinimumWidth(0, 110)
 
         self.retranslateUi(Loader)
 
