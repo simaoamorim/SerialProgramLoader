@@ -118,7 +118,8 @@ class Sender(QRunnable):
             xonxoff=self.xonoff,
             rtscts=self.rtscts,
             dsrdtr=False,
-            timeout=0.1  # 0.1s
+            timeout=None,
+            write_timeout=0.1  # 0.1s
         )
         self.cancelled = False
 
@@ -142,7 +143,6 @@ class Sender(QRunnable):
             self.port.reset_output_buffer()
         else:
             self.port.flush()
-            self.signals.update_status.emit(100)
         self.file.close()
         self.port.close()
 
@@ -291,6 +291,7 @@ class Loader(QWidget):
                     self.ui.flowControlChooser.currentText(),
                     self
                 )
+                self.send_status.setMaximum(self.sender.file.size())
                 self.send_status.canceled.connect(self.sender.cancel)
                 self.sender.signals.update_status.connect(self.send_status.setValue)
                 self.thread_pool.start(self.sender)
