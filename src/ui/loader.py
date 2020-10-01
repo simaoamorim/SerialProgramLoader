@@ -17,7 +17,7 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(298, 400)
+        Loader.resize(260, 400)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
