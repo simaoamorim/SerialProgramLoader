@@ -17,14 +17,14 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(320, 480)
+        Loader.resize(298, 400)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Loader.sizePolicy().hasHeightForWidth())
         Loader.setSizePolicy(sizePolicy)
         font = QFont()
-        font.setPointSize(9)
+        font.setPointSize(8)
         Loader.setFont(font)
         Loader.setLocale(QLocale(QLocale.English, QLocale.UnitedKingdom))
         self.gridLayout = QGridLayout(Loader)
@@ -46,8 +46,8 @@ class Ui_Loader(object):
         self.frame.setSizePolicy(sizePolicy)
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
-        self.formLayout.setHorizontalSpacing(7)
-        self.formLayout.setVerticalSpacing(7)
+        self.formLayout.setHorizontalSpacing(2)
+        self.formLayout.setVerticalSpacing(2)
         self.formLayout.setContentsMargins(0, 0, 0, 0)
         self.updateProgramListButton = QPushButton(self.frame)
         self.updateProgramListButton.setObjectName(u"updateProgramListButton")
@@ -165,7 +165,6 @@ class Ui_Loader(object):
         self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
         self.gridLayout.setColumnStretch(1, 1)
-        self.gridLayout.setColumnMinimumWidth(0, 110)
 
         self.retranslateUi(Loader)
 
