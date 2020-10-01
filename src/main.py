@@ -141,6 +141,8 @@ class Sender(QRunnable):
                     break
         if self.cancelled:
             self.port.reset_output_buffer()
+            self.port.flushOutput()
+            self.port.flush()
         else:
             self.port.flush()
         self.file.close()
