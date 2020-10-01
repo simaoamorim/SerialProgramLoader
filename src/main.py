@@ -332,6 +332,6 @@ if __name__ == '__main__':
     if parser.isSet(startFullScreen):
         window.showFullScreen()
     else:
-        window.show()
+        window.showMaximized()
     ret = app.exec_()
     sys.exit(ret)
