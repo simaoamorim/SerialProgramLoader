@@ -286,11 +286,11 @@ class Loader(QWidget):
                 self.sender = Sender(
                     port_chosen,
                     filepath,
-                    self.ui.baudRateInput.text(),
-                    self.ui.dataBitsChooser.currentText(),
-                    self.ui.parityChooser.currentText(),
-                    self.ui.stopBitsChooser.currentText(),
-                    self.ui.flowControlChooser.currentText(),
+                    globalSettings.value('serialport/baudrate'),
+                    globalSettings.value('serialport/databits'),
+                    globalSettings.value('serialport/parity'),
+                    globalSettings.value('serialport/stopbits'),
+                    globalSettings.value('serialport/flowcontrol'),
                     self
                 )
                 self.send_status.setMaximum(self.sender.file.size())
