@@ -119,7 +119,7 @@ class Sender(QRunnable):
             rtscts=self.rtscts,
             dsrdtr=False,
             timeout=None,
-            write_timeout=0.1  # 0.1s
+            write_timeout=10.0  # 10s
         )
         self.cancelled = False
 
