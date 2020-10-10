@@ -17,12 +17,7 @@ class Ui_Loader(object):
     def setupUi(self, Loader):
         if not Loader.objectName():
             Loader.setObjectName(u"Loader")
-        Loader.resize(260, 400)
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Loader.sizePolicy().hasHeightForWidth())
-        Loader.setSizePolicy(sizePolicy)
+        Loader.resize(480, 230)
         font = QFont()
         font.setPointSize(12)
         Loader.setFont(font)
@@ -35,15 +30,14 @@ class Ui_Loader(object):
         self.programListWidget.setObjectName(u"programListWidget")
         self.programListWidget.setAlternatingRowColors(True)
         self.programListWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.programListWidget.setProperty("isWrapping", True)
+        self.programListWidget.setUniformItemSizes(True)
+        self.programListWidget.setWordWrap(True)
         self.programListWidget.setSelectionRectVisible(True)
 
         self.gridLayout.addWidget(self.programListWidget, 0, 0, 1, 1)
 
         self.frame = QFrame(Loader)
         self.frame.setObjectName(u"frame")
-        sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
-        self.frame.setSizePolicy(sizePolicy)
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setHorizontalSpacing(2)
@@ -51,11 +45,11 @@ class Ui_Loader(object):
         self.formLayout.setContentsMargins(0, 0, 0, 0)
         self.updateProgramListButton = QPushButton(self.frame)
         self.updateProgramListButton.setObjectName(u"updateProgramListButton")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(1)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.updateProgramListButton.sizePolicy().hasHeightForWidth())
-        self.updateProgramListButton.setSizePolicy(sizePolicy1)
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.updateProgramListButton.sizePolicy().hasHeightForWidth())
+        self.updateProgramListButton.setSizePolicy(sizePolicy)
         self.updateProgramListButton.setMinimumSize(QSize(0, 35))
 
         self.formLayout.setWidget(1, QFormLayout.SpanningRole, self.updateProgramListButton)
@@ -74,18 +68,18 @@ class Ui_Loader(object):
         self.sendButton = QPushButton(self.frame)
         self.sendButton.setObjectName(u"sendButton")
         self.sendButton.setEnabled(False)
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(1)
-        sizePolicy2.setVerticalStretch(1)
-        sizePolicy2.setHeightForWidth(self.sendButton.sizePolicy().hasHeightForWidth())
-        self.sendButton.setSizePolicy(sizePolicy2)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy1.setHorizontalStretch(1)
+        sizePolicy1.setVerticalStretch(1)
+        sizePolicy1.setHeightForWidth(self.sendButton.sizePolicy().hasHeightForWidth())
+        self.sendButton.setSizePolicy(sizePolicy1)
 
-        self.formLayout.setWidget(3, QFormLayout.SpanningRole, self.sendButton)
+        self.formLayout.setWidget(4, QFormLayout.SpanningRole, self.sendButton)
 
 
         self.gridLayout.addWidget(self.frame, 0, 1, 1, 1)
 
-        self.gridLayout.setColumnStretch(1, 1)
+        self.gridLayout.setColumnStretch(0, 1)
 
         self.retranslateUi(Loader)
 

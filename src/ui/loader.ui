@@ -6,15 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
-    <height>400</height>
+    <width>480</width>
+    <height>230</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="font">
    <font>
@@ -27,7 +21,7 @@
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1" columnminimumwidth="0,0">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -51,7 +45,10 @@
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
-     <property name="isWrapping" stdset="0">
+     <property name="uniformItemSizes">
+      <bool>true</bool>
+     </property>
+     <property name="wordWrap">
       <bool>true</bool>
      </property>
      <property name="selectionRectVisible">
@@ -61,12 +58,6 @@
    </item>
    <item row="0" column="1">
     <widget class="QFrame" name="frame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <layout class="QFormLayout" name="formLayout">
       <property name="horizontalSpacing">
        <number>2</number>
@@ -122,7 +113,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
+      <item row="4" column="0" colspan="2">
        <widget class="QPushButton" name="sendButton">
         <property name="enabled">
          <bool>false</bool>
