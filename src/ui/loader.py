@@ -24,7 +24,7 @@ class Ui_Loader(object):
         sizePolicy.setHeightForWidth(Loader.sizePolicy().hasHeightForWidth())
         Loader.setSizePolicy(sizePolicy)
         font = QFont()
-        font.setPointSize(8)
+        font.setPointSize(12)
         Loader.setFont(font)
         Loader.setLocale(QLocale(QLocale.English, QLocale.UnitedKingdom))
         self.gridLayout = QGridLayout(Loader)
