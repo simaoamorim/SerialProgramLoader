@@ -183,7 +183,7 @@ class Loader(QWidget):
 
         self.update_program_list()
         self.update_serial_port_list()
-        self.set_serial_port_options()
+        # self.set_serial_port_options()
 
         self.ui.updateProgramListButton.clicked.connect(self.refresh)
         self.ui.programListWidget.itemSelectionChanged.connect(
@@ -192,11 +192,11 @@ class Loader(QWidget):
         self.ui.serialPortChooser.currentTextChanged.connect(
             self.selection_changed)
         self.ui.serialPortChooser.currentTextChanged.connect(save_port)
-        self.ui.baudRateInput.textChanged.connect(save_baud)
-        self.ui.parityChooser.currentTextChanged.connect(save_parity)
-        self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
-        self.ui.stopBitsChooser.currentTextChanged.connect(save_stopbits)
-        self.ui.flowControlChooser.currentTextChanged.connect(save_flowcontrol)
+        # self.ui.baudRateInput.textChanged.connect(save_baud)
+        # self.ui.parityChooser.currentTextChanged.connect(save_parity)
+        # self.ui.dataBitsChooser.currentTextChanged.connect(save_databits)
+        # self.ui.stopBitsChooser.currentTextChanged.connect(save_stopbits)
+        # self.ui.flowControlChooser.currentTextChanged.connect(save_flowcontrol)
         self.thread_pool = QThreadPool()
 
     def set_serial_port_options(self):
